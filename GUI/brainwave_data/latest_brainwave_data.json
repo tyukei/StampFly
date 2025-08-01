@@ -1,0 +1,934 @@
+{
+  "timestamp": "2025-08-01T23:36:00.771566",
+  "data_points": 100,
+  "duration_seconds": 10.0,
+  "brainwave_data": [
+    {
+      "timestamp": 1754058677.3921397,
+      "theta_power": 212340.83142544306,
+      "alpha_power": 75835.69795371052,
+      "beta_power": 3282.6061776964016,
+      "gamma_power": 1.219342678397913,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058680.1838233,
+      "theta_power": 421853.46247596614,
+      "alpha_power": 215377.9488511002,
+      "beta_power": 7299.242676371187,
+      "gamma_power": 2.3559677910013233,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058682.899557,
+      "theta_power": 520325.08581166534,
+      "alpha_power": 559524.1887271411,
+      "beta_power": 12108.448773101336,
+      "gamma_power": 5.575849974454864,
+      "dominant_wave": "alpha",
+      "command": "alpha"
+    },
+    {
+      "timestamp": 1754058685.5674937,
+      "theta_power": 442942.43534765334,
+      "alpha_power": 231669.52927162623,
+      "beta_power": 8481.600433044596,
+      "gamma_power": 5.614680905966216,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058688.4163945,
+      "theta_power": 180977.81374992258,
+      "alpha_power": 101818.45893840432,
+      "beta_power": 5108.006480161786,
+      "gamma_power": 1.6384189380206449,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058691.2131605,
+      "theta_power": 310981.6103554703,
+      "alpha_power": 68140.21827011394,
+      "beta_power": 6004.675724254257,
+      "gamma_power": 1.6378777380830638,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058694.0462232,
+      "theta_power": 368733.98437642003,
+      "alpha_power": 44721.352925985244,
+      "beta_power": 7680.384298987793,
+      "gamma_power": 3.7236760385661314,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058696.829675,
+      "theta_power": 210926.3158582115,
+      "alpha_power": 23602.011044223138,
+      "beta_power": 8518.011026375681,
+      "gamma_power": 1.344883113315975,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058699.666832,
+      "theta_power": 268165.3943316794,
+      "alpha_power": 127549.31867848126,
+      "beta_power": 10643.495610965696,
+      "gamma_power": 2.2625601785390295,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058702.5079978,
+      "theta_power": 490979.77037666447,
+      "alpha_power": 56558.54806500358,
+      "beta_power": 17347.084271515305,
+      "gamma_power": 3.933070023388403,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058705.299996,
+      "theta_power": 425695.1118690971,
+      "alpha_power": 50428.80392224311,
+      "beta_power": 14156.967601973047,
+      "gamma_power": 1.7970180819154349,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058708.1716998,
+      "theta_power": 465896.32683973206,
+      "alpha_power": 195227.52360466766,
+      "beta_power": 14984.19387201539,
+      "gamma_power": 4.421307851564324,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058710.9225626,
+      "theta_power": 320439.45706196595,
+      "alpha_power": 47515.639290894374,
+      "beta_power": 9188.754637745331,
+      "gamma_power": 2.24611433683391,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058713.7883754,
+      "theta_power": 689380.4376173997,
+      "alpha_power": 450117.81503296277,
+      "beta_power": 11027.282866696052,
+      "gamma_power": 3.2231198088299386,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058716.6565475,
+      "theta_power": 388141.6856284355,
+      "alpha_power": 167228.0686552144,
+      "beta_power": 8147.6706118908205,
+      "gamma_power": 5.0144182328749904,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058719.3783183,
+      "theta_power": 539567.9526037298,
+      "alpha_power": 249383.165900498,
+      "beta_power": 8514.706218475505,
+      "gamma_power": 4.993203569790861,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058722.2562253,
+      "theta_power": 378561.542238627,
+      "alpha_power": 57096.007863196,
+      "beta_power": 8408.385276896854,
+      "gamma_power": 2.5466257713580016,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058725.030789,
+      "theta_power": 509238.76318692265,
+      "alpha_power": 281674.3506227379,
+      "beta_power": 11854.371879987533,
+      "gamma_power": 1.4696814132303202,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058727.8734531,
+      "theta_power": 483504.5454086228,
+      "alpha_power": 238250.8792733916,
+      "beta_power": 15688.123100271681,
+      "gamma_power": 2.789167523821485,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058730.6839044,
+      "theta_power": 909719.6789395581,
+      "alpha_power": 331440.9527437392,
+      "beta_power": 11547.843351918778,
+      "gamma_power": 3.099022146423486,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058733.495646,
+      "theta_power": 819561.5578830211,
+      "alpha_power": 176427.69481155887,
+      "beta_power": 5932.216464401245,
+      "gamma_power": 1.6370974653896173,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058736.296595,
+      "theta_power": 365028.01316214964,
+      "alpha_power": 220300.9347764956,
+      "beta_power": 7504.9271851696,
+      "gamma_power": 5.635705055842049,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058739.1662898,
+      "theta_power": 420911.2772099428,
+      "alpha_power": 340127.34516772476,
+      "beta_power": 5762.687032170074,
+      "gamma_power": 5.139931463818801,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058742.069721,
+      "theta_power": 1074852.8154566276,
+      "alpha_power": 369898.77638217487,
+      "beta_power": 6145.472043541348,
+      "gamma_power": 8.276337165279287,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058744.8569736,
+      "theta_power": 456386.06821010326,
+      "alpha_power": 398990.39319771435,
+      "beta_power": 10272.251626704168,
+      "gamma_power": 3.6281340429592728,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058747.7305791,
+      "theta_power": 298488.5080401668,
+      "alpha_power": 134015.95682133216,
+      "beta_power": 6326.769427804189,
+      "gamma_power": 1.6693289262041549,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058750.539613,
+      "theta_power": 1252856.1486030247,
+      "alpha_power": 645896.8905848522,
+      "beta_power": 14150.904970212916,
+      "gamma_power": 2.7765153346192637,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058753.3640091,
+      "theta_power": 246386.87243790086,
+      "alpha_power": 65292.281243010635,
+      "beta_power": 6535.992405580817,
+      "gamma_power": 2.7930957002513104,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058756.1599383,
+      "theta_power": 212839.53989217285,
+      "alpha_power": 28317.248222896687,
+      "beta_power": 5621.514544487334,
+      "gamma_power": 1.0397399882948257,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058758.96466,
+      "theta_power": 258576.19207904823,
+      "alpha_power": 102085.31964787914,
+      "beta_power": 5832.756929793533,
+      "gamma_power": 2.2990058436410274,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058761.790811,
+      "theta_power": 523983.63399523916,
+      "alpha_power": 95270.68513428286,
+      "beta_power": 6202.993842425366,
+      "gamma_power": 3.1394239496265604,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058764.655771,
+      "theta_power": 444687.02050772676,
+      "alpha_power": 131148.17016911344,
+      "beta_power": 7404.788695204521,
+      "gamma_power": 3.3302052380258647,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058767.601458,
+      "theta_power": 1244917.1033959403,
+      "alpha_power": 469120.13182987075,
+      "beta_power": 9618.18944608272,
+      "gamma_power": 2.690878623865604,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058770.3462927,
+      "theta_power": 446966.5823866422,
+      "alpha_power": 129075.99026865914,
+      "beta_power": 9361.707150084503,
+      "gamma_power": 2.4420203063390256,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058773.17584,
+      "theta_power": 512035.2080134366,
+      "alpha_power": 43093.3893434349,
+      "beta_power": 10846.788100702826,
+      "gamma_power": 2.274388091872864,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058775.9694643,
+      "theta_power": 563137.3310656865,
+      "alpha_power": 169179.45022363667,
+      "beta_power": 11294.028465650743,
+      "gamma_power": 2.251784754100682,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058778.7831094,
+      "theta_power": 330954.81153748825,
+      "alpha_power": 107639.4548665574,
+      "beta_power": 8497.811828512391,
+      "gamma_power": 1.0283567184488274,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058781.559276,
+      "theta_power": 596249.7585223644,
+      "alpha_power": 105758.00392917734,
+      "beta_power": 7204.116317279838,
+      "gamma_power": 4.154202629234941,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058784.3572006,
+      "theta_power": 701816.7721229208,
+      "alpha_power": 266203.483624812,
+      "beta_power": 10182.336761142407,
+      "gamma_power": 1.9957214868096453,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058787.1883562,
+      "theta_power": 731942.5954768079,
+      "alpha_power": 227885.77191101434,
+      "beta_power": 9996.040319745998,
+      "gamma_power": 1.4179805558377683,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058789.9877114,
+      "theta_power": 596164.0453339336,
+      "alpha_power": 259298.87298366122,
+      "beta_power": 11157.718104808324,
+      "gamma_power": 1.9279778008974557,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058792.8007677,
+      "theta_power": 371194.1072111331,
+      "alpha_power": 39265.41168413297,
+      "beta_power": 8170.681332738941,
+      "gamma_power": 3.4082115864331146,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058795.5894475,
+      "theta_power": 478144.8893989743,
+      "alpha_power": 89524.99153140512,
+      "beta_power": 11589.61461192536,
+      "gamma_power": 1.786205301197382,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058798.4003038,
+      "theta_power": 527990.7099797358,
+      "alpha_power": 224482.79530038842,
+      "beta_power": 8117.5226512787785,
+      "gamma_power": 1.5965958376986384,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058801.219995,
+      "theta_power": 718572.465493988,
+      "alpha_power": 250630.06556824505,
+      "beta_power": 8818.976655661809,
+      "gamma_power": 2.9184803199388853,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058804.0292797,
+      "theta_power": 476244.6844046538,
+      "alpha_power": 306182.7981114392,
+      "beta_power": 6203.257064252613,
+      "gamma_power": 5.037261227298546,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058806.8835304,
+      "theta_power": 950156.7283592517,
+      "alpha_power": 228445.36631378287,
+      "beta_power": 5415.520521716826,
+      "gamma_power": 3.439326616082589,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058809.764076,
+      "theta_power": 389032.29364681436,
+      "alpha_power": 118750.20433206546,
+      "beta_power": 6743.074255957565,
+      "gamma_power": 1.2422023703264626,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058812.6153429,
+      "theta_power": 706700.9378788671,
+      "alpha_power": 234200.0244924328,
+      "beta_power": 7080.502661145944,
+      "gamma_power": 2.66010893943116,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058815.2709196,
+      "theta_power": 310734.19370214007,
+      "alpha_power": 41194.271822642935,
+      "beta_power": 11405.423713958695,
+      "gamma_power": 2.896127983415118,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058818.1969445,
+      "theta_power": 249857.1078594361,
+      "alpha_power": 54234.3954299898,
+      "beta_power": 8810.918548262938,
+      "gamma_power": 3.6219415777893658,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058820.7465193,
+      "theta_power": 215370.50720477715,
+      "alpha_power": 88438.43112191901,
+      "beta_power": 10383.00732494482,
+      "gamma_power": 4.714496063679288,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058823.7138875,
+      "theta_power": 768107.9966742727,
+      "alpha_power": 433244.66473852354,
+      "beta_power": 8973.794905931856,
+      "gamma_power": 3.7958347492416404,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058826.551868,
+      "theta_power": 340334.2260908448,
+      "alpha_power": 316824.77283696155,
+      "beta_power": 3741.366437898724,
+      "gamma_power": 4.232212209448973,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058829.349371,
+      "theta_power": 189563.2245029431,
+      "alpha_power": 32366.367334731727,
+      "beta_power": 5136.468032805638,
+      "gamma_power": 2.1380855388226916,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058832.2379456,
+      "theta_power": 564477.9414791032,
+      "alpha_power": 198257.02030201917,
+      "beta_power": 9777.438897349823,
+      "gamma_power": 2.206056497944609,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058835.0938838,
+      "theta_power": 332911.4487835598,
+      "alpha_power": 113050.7629022261,
+      "beta_power": 8730.652257871918,
+      "gamma_power": 3.1205521715492894,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058837.9901628,
+      "theta_power": 701954.8762628372,
+      "alpha_power": 324434.10616072756,
+      "beta_power": 10508.893035487943,
+      "gamma_power": 4.408891716494296,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058840.8341353,
+      "theta_power": 763122.9803329825,
+      "alpha_power": 583200.3325141151,
+      "beta_power": 14748.139214772673,
+      "gamma_power": 2.714297140322321,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058843.6861699,
+      "theta_power": 1093791.9525845356,
+      "alpha_power": 616937.4015860333,
+      "beta_power": 14416.149349227137,
+      "gamma_power": 4.568757926591784,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058846.5410407,
+      "theta_power": 1002511.0947282608,
+      "alpha_power": 555169.2831139398,
+      "beta_power": 15145.259944822124,
+      "gamma_power": 3.9564916844857483,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058849.3829377,
+      "theta_power": 497197.1608089012,
+      "alpha_power": 140616.82182106795,
+      "beta_power": 13501.57658592589,
+      "gamma_power": 1.5429256719367717,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058852.24946,
+      "theta_power": 1160198.908983993,
+      "alpha_power": 690811.6097779628,
+      "beta_power": 16087.84521149621,
+      "gamma_power": 2.5026395320140784,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058855.137371,
+      "theta_power": 349516.9161481764,
+      "alpha_power": 147176.8361680689,
+      "beta_power": 9157.670159984471,
+      "gamma_power": 2.111355946096373,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058858.0515053,
+      "theta_power": 16268876.946998093,
+      "alpha_power": 2500595.542578366,
+      "beta_power": 60445.23330565876,
+      "gamma_power": 4.2799224536509834,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058860.9595966,
+      "theta_power": 1149866.430857346,
+      "alpha_power": 406216.11023081414,
+      "beta_power": 13583.685332348401,
+      "gamma_power": 1.619531558335545,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058863.8353927,
+      "theta_power": 913446.4696391474,
+      "alpha_power": 219151.34340697888,
+      "beta_power": 10539.972324845492,
+      "gamma_power": 1.5660974910955383,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058866.7768877,
+      "theta_power": 900010.733914598,
+      "alpha_power": 423062.3165752038,
+      "beta_power": 6175.154208615083,
+      "gamma_power": 2.1901506330248086,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058870.8692496,
+      "theta_power": 984697.6395596606,
+      "alpha_power": 173965.7423088504,
+      "beta_power": 8412.24311022401,
+      "gamma_power": 0.8948212328029723,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058873.7396855,
+      "theta_power": 718786.0707381224,
+      "alpha_power": 269205.2268528247,
+      "beta_power": 7992.26674641069,
+      "gamma_power": 2.257841588997927,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058876.6498215,
+      "theta_power": 645299.7029349098,
+      "alpha_power": 465404.1203110308,
+      "beta_power": 10642.492736502956,
+      "gamma_power": 2.662625735606605,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058879.512648,
+      "theta_power": 15761051.913297469,
+      "alpha_power": 2851492.848080929,
+      "beta_power": 54052.49707181546,
+      "gamma_power": 5.12719809530526,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058882.2755013,
+      "theta_power": 1291292.8950583483,
+      "alpha_power": 394136.7537266964,
+      "beta_power": 9516.492935331706,
+      "gamma_power": 3.080940029339621,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058885.107465,
+      "theta_power": 613668.255855633,
+      "alpha_power": 307862.1750440903,
+      "beta_power": 12400.813234407884,
+      "gamma_power": 3.369676148846458,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058887.9678674,
+      "theta_power": 517706.9523269764,
+      "alpha_power": 201072.2744672312,
+      "beta_power": 11561.873159147817,
+      "gamma_power": 2.832454837785269,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058890.8252244,
+      "theta_power": 635841.8928902891,
+      "alpha_power": 237702.11591854328,
+      "beta_power": 10181.015454300412,
+      "gamma_power": 2.1319674079767483,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058893.729861,
+      "theta_power": 451910.7418076837,
+      "alpha_power": 207121.91304315292,
+      "beta_power": 7652.606610713009,
+      "gamma_power": 1.941615271434332,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058896.568258,
+      "theta_power": 265410.8818366049,
+      "alpha_power": 41090.079027584914,
+      "beta_power": 6993.76846499046,
+      "gamma_power": 2.586403804275871,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058899.4043531,
+      "theta_power": 800444.497504131,
+      "alpha_power": 530155.1449886587,
+      "beta_power": 12820.009724902053,
+      "gamma_power": 5.627696891908825,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058902.2953112,
+      "theta_power": 1180234.1493167114,
+      "alpha_power": 511255.71434064576,
+      "beta_power": 19782.75225598451,
+      "gamma_power": 4.6955778075351615,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058905.0918572,
+      "theta_power": 467345.8683501953,
+      "alpha_power": 172825.15804439248,
+      "beta_power": 13906.351137362115,
+      "gamma_power": 5.375205179223981,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058907.876794,
+      "theta_power": 295956.8226821111,
+      "alpha_power": 28774.322296620518,
+      "beta_power": 8843.706906488067,
+      "gamma_power": 2.437853259977272,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058910.7300742,
+      "theta_power": 548087.6736282603,
+      "alpha_power": 290320.59895773715,
+      "beta_power": 10210.171704090122,
+      "gamma_power": 2.102066133491075,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058913.5267649,
+      "theta_power": 553676.0672691151,
+      "alpha_power": 190447.94991947993,
+      "beta_power": 11079.436223241873,
+      "gamma_power": 1.9169552287424343,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058916.3531792,
+      "theta_power": 184886.92167582625,
+      "alpha_power": 95197.29537178072,
+      "beta_power": 5062.39370067442,
+      "gamma_power": 1.6706984980997,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058919.319,
+      "theta_power": 162201.58690566075,
+      "alpha_power": 46567.52706677455,
+      "beta_power": 6703.594902679296,
+      "gamma_power": 2.14759035847446,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058922.1649067,
+      "theta_power": 630492.5164863607,
+      "alpha_power": 526104.8107106664,
+      "beta_power": 7720.1697515653805,
+      "gamma_power": 1.974574921490904,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058925.0549357,
+      "theta_power": 797591.4751475637,
+      "alpha_power": 565440.7407099319,
+      "beta_power": 8642.494891673352,
+      "gamma_power": 2.2014774018987344,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058927.916932,
+      "theta_power": 334404.573754447,
+      "alpha_power": 76522.43782466168,
+      "beta_power": 7956.979792703693,
+      "gamma_power": 0.9399699572982134,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058930.7927508,
+      "theta_power": 542425.2410403849,
+      "alpha_power": 405286.5671896426,
+      "beta_power": 12008.646771265283,
+      "gamma_power": 2.262057566925678,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058933.7184865,
+      "theta_power": 1128042.4130427085,
+      "alpha_power": 777981.5173711849,
+      "beta_power": 11588.13135136406,
+      "gamma_power": 2.5112988229353737,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058936.6062074,
+      "theta_power": 372835.59173851786,
+      "alpha_power": 74385.82155673974,
+      "beta_power": 4734.010963612444,
+      "gamma_power": 1.340911002558609,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058939.4705012,
+      "theta_power": 30672540.579042863,
+      "alpha_power": 6795867.198043958,
+      "beta_power": 112770.07521049207,
+      "gamma_power": 13.817601556314882,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058942.4023309,
+      "theta_power": 6086852.682811317,
+      "alpha_power": 1246966.550232226,
+      "beta_power": 19438.344444318198,
+      "gamma_power": 2.7795306212515003,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058945.288997,
+      "theta_power": 599294.1046882201,
+      "alpha_power": 382791.5532203852,
+      "beta_power": 2830.7954126809627,
+      "gamma_power": 3.0639694194186475,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058948.3186316,
+      "theta_power": 712022.1448381837,
+      "alpha_power": 581305.4774763072,
+      "beta_power": 13136.849044215434,
+      "gamma_power": 4.425575381183919,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058951.231808,
+      "theta_power": 653651.7564681864,
+      "alpha_power": 452654.0281479406,
+      "beta_power": 15858.791425952415,
+      "gamma_power": 3.0213443095329873,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058954.4076443,
+      "theta_power": 1428816.3207590657,
+      "alpha_power": 382295.28260614496,
+      "beta_power": 14132.090995624249,
+      "gamma_power": 3.5377596909076794,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058957.5362258,
+      "theta_power": 712959.2809945066,
+      "alpha_power": 217158.63000911547,
+      "beta_power": 10925.307543932187,
+      "gamma_power": 3.2126605702035618,
+      "dominant_wave": "theta",
+      "command": "theta"
+    },
+    {
+      "timestamp": 1754058960.4640944,
+      "theta_power": 452595.268091123,
+      "alpha_power": 28182.743396052803,
+      "beta_power": 10259.187553345415,
+      "gamma_power": 3.3952548851822844,
+      "dominant_wave": "theta",
+      "command": "theta"
+    }
+  ],
+  "statistics": {
+    "theta": {
+      "mean": 1242300.2647730608,
+      "std": 3710404.118610276,
+      "min": 162201.58690566075,
+      "max": 30672540.579042863
+    },
+    "alpha": {
+      "mean": 369621.91090793366,
+      "std": 757382.0104399375,
+      "min": 23602.011044223138,
+      "max": 6795867.198043958
+    },
+    "beta": {
+      "mean": 11690.680263307484,
+      "std": 12609.021752827235,
+      "min": 2830.7954126809627,
+      "max": 112770.07521049207
+    },
+    "gamma": {
+      "mean": 3.0407177161900814,
+      "std": 1.712677146621654,
+      "min": 0.8948212328029723,
+      "max": 13.817601556314882
+    },
+    "dominant_wave": "theta"
+  }
+}

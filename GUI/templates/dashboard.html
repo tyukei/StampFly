@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 PiEEG Brainwave Dashboard</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-item {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 10px 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .status-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+
+        .card h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+
+        .brainwave-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .brainwave-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .brainwave-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+
+        .brainwave-item.dominant {
+            background: rgba(255,215,0,0.3);
+            border: 2px solid #ffd700;
+            animation: pulse 2s infinite;
+        }
+
+        .wave-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .wave-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .ai-analysis {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .recommendations {
+            list-style: none;
+        }
+
+        .recommendations li {
+            background: rgba(255,255,255,0.1);
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+            transition: all 0.3s ease;
+        }
+
+        .recommendations li:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateX(5px);
+        }
+
+        .mood-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            transition: width 0.5s ease;
+            border-radius: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,107,107,0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .connection-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4757;
+            animation: blink 1s infinite;
+        }
+
+        .connection-dot.connected {
+            background: #2ed573;
+            animation: none;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        /* Brain Map Styles */
+        .brain-map-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+        }
+
+        .brain-map {
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .electrode {
+            fill: rgba(255,255,255,0.3);
+            stroke: rgba(255,255,255,0.6);
+            stroke-width: 2;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .electrode:hover {
+            fill: rgba(255,255,255,0.8);
+            stroke: #ffd700;
+            stroke-width: 3;
+            r: 10;
+        }
+
+        .electrode.active {
+            fill: #ff4757;
+            stroke: #ff3742;
+            animation: electrode-pulse 1.5s infinite;
+        }
+
+        .electrode.medium {
+            fill: #ffa502;
+            stroke: #ff9500;
+        }
+
+        .electrode.low {
+            fill: #2ed573;
+            stroke: #26de81;
+        }
+
+        .electrode-label {
+            fill: rgba(255,255,255,0.8);
+            font-size: 12px;
+            font-weight: bold;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+
+        .activity-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        @keyframes electrode-pulse {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Electrode tooltip */
+        .electrode-tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .electrode-tooltip.show {
+            opacity: 1;
+        }
+
+        /* GPIO Configuration Styles */
+        .gpio-config-container {
+            padding: 20px;
+        }
+
+        .config-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffd700;
+        }
+
+        .gpio-config-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .config-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .config-item label {
+            font-weight: bold;
+            font-size: 0.95em;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .gpio-select {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gpio-select:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .gpio-select:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 0 2px rgba(255,215,0,0.3);
+        }
+
+        .gpio-select option {
+            background: #333;
+            color: white;
+        }
+
+        .gpio-warnings {
+            background: rgba(255,107,107,0.1);
+            border: 1px solid rgba(255,107,107,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .gpio-warnings h4 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .gpio-warnings ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .gpio-warnings li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .gpio-warnings li:before {
+            content: "⚠️";
+            position: absolute;
+            left: 0;
+        }
+
+        .config-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #2ed573, #26de81);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #45b7d1, #3498db);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        .config-status {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .config-status.success {
+            background: rgba(46,213,115,0.2);
+            border: 1px solid rgba(46,213,115,0.5);
+        }
+
+        .config-status.error {
+            background: rgba(255,107,107,0.2);
+            border: 1px solid rgba(255,107,107,0.5);
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .brainwave-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .brain-map-container {
+                height: 300px;
+            }
+
+            .activity-legend {
+                gap: 10px;
+            }
+
+            .legend-item {
+                font-size: 0.8em;
+            }
+
+            .gpio-config-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 PiEEG Brainwave Dashboard</h1>
+            <p>Real-time brainwave monitoring with Claude Code analysis (no API key needed!)</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="connection-status">
+                    <div class="connection-dot" id="mqtt-status"></div>
+                    <span id="mqtt-text">MQTT: Disconnected</span>
+                </div>
+            </div>
+            <div class="status-item">
+                <div class="connection-status">
+                    <div class="connection-dot" id="ai-status"></div>
+                    <span id="ai-text">Claude: Ready</span>
+                </div>
+            </div>
+            <div class="status-item">
+                <span id="last-update">Last update: Never</span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Real-time Brainwave Data -->
+            <div class="card">
+                <h3><i class="fas fa-brain"></i> Live Brainwave Activity</h3>
+                <div class="brainwave-grid">
+                    <div class="brainwave-item" id="theta-item">
+                        <div class="wave-label">Theta</div>
+                        <div class="wave-value" id="theta-value">0.000</div>
+                        <div class="wave-label">4-8 Hz</div>
+                    </div>
+                    <div class="brainwave-item" id="alpha-item">
+                        <div class="wave-label">Alpha</div>
+                        <div class="wave-value" id="alpha-value">0.000</div>
+                        <div class="wave-label">8-12 Hz</div>
+                    </div>
+                    <div class="brainwave-item" id="beta-item">
+                        <div class="wave-label">Beta</div>
+                        <div class="wave-value" id="beta-value">0.000</div>
+                        <div class="wave-label">13-30 Hz</div>
+                    </div>
+                    <div class="brainwave-item" id="gamma-item">
+                        <div class="wave-label">Gamma</div>
+                        <div class="wave-value" id="gamma-value">0.000</div>
+                        <div class="wave-label">30-100 Hz</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="brainwaveChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Brain Electrode Map -->
+            <div class="card">
+                <h3><i class="fas fa-head-side-virus"></i> 16-Channel Electrode Map</h3>
+                <div class="brain-map-container">
+                    <svg viewBox="0 0 400 300" class="brain-map">
+                        <!-- Brain outline (top view) -->
+                        <ellipse cx="200" cy="150" rx="140" ry="110" fill="rgba(255,255,255,0.1)" 
+                                stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                        <!-- Nose indicator -->
+                        <polygon points="200,40 190,25 210,25" fill="rgba(255,255,255,0.3)"/>
+                        
+                        <!-- 10-20 System Electrode Positions for 16 channels -->
+                        <!-- Front row -->
+                        <circle cx="160" cy="80" r="8" class="electrode" id="ch1" data-channel="1" data-label="Fp1"/>
+                        <circle cx="240" cy="80" r="8" class="electrode" id="ch2" data-channel="2" data-label="Fp2"/>
+                        <circle cx="120" cy="100" r="8" class="electrode" id="ch3" data-channel="3" data-label="F7"/>
+                        <circle cx="160" cy="110" r="8" class="electrode" id="ch4" data-channel="4" data-label="F3"/>
+                        <circle cx="200" cy="100" r="8" class="electrode" id="ch5" data-channel="5" data-label="Fz"/>
+                        <circle cx="240" cy="110" r="8" class="electrode" id="ch6" data-channel="6" data-label="F4"/>
+                        <circle cx="280" cy="100" r="8" class="electrode" id="ch7" data-channel="7" data-label="F8"/>
+                        
+                        <!-- Central row -->
+                        <circle cx="100" cy="150" r="8" class="electrode" id="ch8" data-channel="8" data-label="T3"/>
+                        <circle cx="160" cy="150" r="8" class="electrode" id="ch9" data-channel="9" data-label="C3"/>
+                        <circle cx="200" cy="150" r="8" class="electrode" id="ch10" data-channel="10" data-label="Cz"/>
+                        <circle cx="240" cy="150" r="8" class="electrode" id="ch11" data-channel="11" data-label="C4"/>
+                        <circle cx="300" cy="150" r="8" class="electrode" id="ch12" data-channel="12" data-label="T4"/>
+                        
+                        <!-- Back row -->
+                        <circle cx="160" cy="200" r="8" class="electrode" id="ch13" data-channel="13" data-label="P3"/>
+                        <circle cx="200" cy="210" r="8" class="electrode" id="ch14" data-channel="14" data-label="Pz"/>
+                        <circle cx="240" cy="200" r="8" class="electrode" id="ch15" data-channel="15" data-label="P4"/>
+                        <circle cx="200" cy="240" r="8" class="electrode" id="ch16" data-channel="16" data-label="Oz"/>
+                        
+                        <!-- Channel labels -->
+                        <text x="160" y="70" text-anchor="middle" class="electrode-label">Fp1</text>
+                        <text x="240" y="70" text-anchor="middle" class="electrode-label">Fp2</text>
+                        <text x="120" y="90" text-anchor="middle" class="electrode-label">F7</text>
+                        <text x="160" y="100" text-anchor="middle" class="electrode-label">F3</text>
+                        <text x="200" y="90" text-anchor="middle" class="electrode-label">Fz</text>
+                        <text x="240" y="100" text-anchor="middle" class="electrode-label">F4</text>
+                        <text x="280" y="90" text-anchor="middle" class="electrode-label">F8</text>
+                        <text x="100" y="140" text-anchor="middle" class="electrode-label">T3</text>
+                        <text x="160" y="140" text-anchor="middle" class="electrode-label">C3</text>
+                        <text x="200" y="140" text-anchor="middle" class="electrode-label">Cz</text>
+                        <text x="240" y="140" text-anchor="middle" class="electrode-label">C4</text>
+                        <text x="300" y="140" text-anchor="middle" class="electrode-label">T4</text>
+                        <text x="160" y="190" text-anchor="middle" class="electrode-label">P3</text>
+                        <text x="200" y="200" text-anchor="middle" class="electrode-label">Pz</text>
+                        <text x="240" y="190" text-anchor="middle" class="electrode-label">P4</text>
+                        <text x="200" y="230" text-anchor="middle" class="electrode-label">Oz</text>
+                    </svg>
+                    
+                    <!-- Activity Legend -->
+                    <div class="activity-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff4757;"></div>
+                            <span>High Activity</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ffa502;"></div>
+                            <span>Medium Activity</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #2ed573;"></div>
+                            <span>Low Activity</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: rgba(255,255,255,0.3);"></div>
+                            <span>No Signal</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Electrode tooltip -->
+                    <div class="electrode-tooltip" id="electrode-tooltip"></div>
+                </div>
+            </div>
+
+            <!-- AI Analysis -->
+            <div class="card">
+                <h3><i class="fas fa-robot"></i> Claude AI Analysis</h3>
+                <div class="mood-indicator">
+                    <i class="fas fa-smile"></i>
+                    <span id="mood-text">Analyzing...</span>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stress-level">0%</div>
+                        <div class="stat-label">Stress</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="focus-level">0%</div>
+                        <div class="stat-label">Focus</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="relaxation-level">0%</div>
+                        <div class="stat-label">Relaxation</div>
+                    </div>
+                </div>
+
+                <div class="ai-analysis">
+                    <h4><i class="fas fa-lightbulb"></i> Current Analysis</h4>
+                    <p id="ai-analysis-text">Waiting for brainwave data...</p>
+                </div>
+
+                <div class="recommendations">
+                    <h4><i class="fas fa-tasks"></i> Recommendations</h4>
+                    <ul id="recommendations-list">
+                        <li>Connect your PiEEG device to start receiving data</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="saveForAnalysis()">
+                <i class="fas fa-save"></i> Save for Analysis
+            </button>
+            <button class="btn" onclick="toggleRecording()">
+                <i class="fas fa-record-vinyl"></i> <span id="record-text">Start Recording</span>
+            </button>
+            <button class="btn" onclick="exportData()">
+                <i class="fas fa-download"></i> Export Data
+            </button>
+            <button class="btn" onclick="toggleGPIOConfig()">
+                <i class="fas fa-cog"></i> GPIO Config
+            </button>
+        </div>
+
+        <!-- Claude Code Instructions -->
+        <div class="card" id="claude-instructions" style="display: none;">
+            <h3><i class="fas fa-terminal"></i> Claude Code Analysis</h3>
+            <div class="ai-analysis">
+                <h4><i class="fas fa-lightbulb"></i> Next Steps</h4>
+                <p>Data saved! Now run Claude Code in your terminal:</p>
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin: 10px 0; font-family: monospace;">
+                    <code>claude dashboard/analyze_brainwaves.py</code>
+                </div>
+                <p>The analysis will appear in this dashboard automatically!</p>
+            </div>
+        </div>
+
+        <!-- Historical Data Chart -->
+        <div class="card">
+            <h3><i class="fas fa-chart-line"></i> Historical Trends</h3>
+            <div class="chart-container">
+                <canvas id="historicalChart"></canvas>
+            </div>
+        </div>
+
+        <!-- GPIO Configuration Card -->
+        <div class="card" id="gpio-config-card" style="display: none;">
+            <h3><i class="fas fa-microchip"></i> GPIO Pin Configuration</h3>
+            <div class="gpio-config-container">
+                <div class="config-info">
+                    <p><i class="fas fa-info-circle"></i> Configure which GPIO pins to use for PiEEG-16 hardware connections</p>
+                </div>
+                
+                <div class="gpio-config-grid">
+                    <div class="config-item">
+                        <label for="cs-pin">CS Pin (Chip Select)</label>
+                        <select id="cs-pin" class="gpio-select">
+                            <option value="19" selected>GPIO 19 (Default)</option>
+                            <option value="5">GPIO 5</option>
+                            <option value="6">GPIO 6</option>
+                            <option value="12">GPIO 12</option>
+                            <option value="16">GPIO 16</option>
+                            <option value="17">GPIO 17</option>
+                            <option value="18">GPIO 18</option>
+                            <option value="20">GPIO 20</option>
+                            <option value="21">GPIO 21</option>
+                            <option value="22">GPIO 22</option>
+                            <option value="23">GPIO 23</option>
+                            <option value="24">GPIO 24</option>
+                            <option value="25">GPIO 25</option>
+                            <option value="27">GPIO 27</option>
+                        </select>
+                    </div>
+                    
+                    <div class="config-item">
+                        <label for="button1-pin">Button 1 Pin (Start/Stop)</label>
+                        <select id="button1-pin" class="gpio-select">
+                            <option value="26" selected>GPIO 26 (Default)</option>
+                            <option value="5">GPIO 5</option>
+                            <option value="6">GPIO 6</option>
+                            <option value="12">GPIO 12</option>
+                            <option value="13">GPIO 13</option>
+                            <option value="16">GPIO 16</option>
+                            <option value="17">GPIO 17</option>
+                            <option value="18">GPIO 18</option>
+                            <option value="20">GPIO 20</option>
+                            <option value="21">GPIO 21</option>
+                            <option value="22">GPIO 22</option>
+                            <option value="23">GPIO 23</option>
+                            <option value="24">GPIO 24</option>
+                            <option value="25">GPIO 25</option>
+                            <option value="27">GPIO 27</option>
+                        </select>
+                    </div>
+                    
+                    <div class="config-item">
+                        <label for="button2-pin">Button 2 Pin (Optional)</label>
+                        <select id="button2-pin" class="gpio-select">
+                            <option value="13" selected>GPIO 13 (Default)</option>
+                            <option value="5">GPIO 5</option>
+                            <option value="6">GPIO 6</option>
+                            <option value="12">GPIO 12</option>
+                            <option value="16">GPIO 16</option>
+                            <option value="17">GPIO 17</option>
+                            <option value="18">GPIO 18</option>
+                            <option value="20">GPIO 20</option>
+                            <option value="21">GPIO 21</option>
+                            <option value="22">GPIO 22</option>
+                            <option value="23">GPIO 23</option>
+                            <option value="24">GPIO 24</option>
+                            <option value="25">GPIO 25</option>
+                            <option value="26">GPIO 26</option>
+                            <option value="27">GPIO 27</option>
+                        </select>
+                    </div>
+                    
+                    <div class="config-item">
+                        <label for="gpio-chip">GPIO Chip (Pi Model)</label>
+                        <select id="gpio-chip" class="gpio-select">
+                            <option value="0" selected>gpiochip0 (Default)</option>
+                            <option value="/dev/gpiochip4">gpiochip4 (Pi 5)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="gpio-warnings">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Reserved Pins (Do Not Use)</h4>
+                    <ul>
+                        <li><strong>GPIO 0-3:</strong> I2C bus (system reserved)</li>
+                        <li><strong>GPIO 7-11:</strong> SPI bus (used by PiEEG ADCs)</li>
+                        <li><strong>GPIO 14-15:</strong> UART (serial console)</li>
+                    </ul>
+                </div>
+                
+                <div class="config-actions">
+                    <button class="btn btn-primary" onclick="saveGPIOConfig()">
+                        <i class="fas fa-save"></i> Save Configuration
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadCurrentGPIOConfig()">
+                        <i class="fas fa-sync"></i> Load Current
+                    </button>
+                    <button class="btn btn-danger" onclick="resetGPIOConfig()">
+                        <i class="fas fa-undo"></i> Reset to Defaults
+                    </button>
+                </div>
+                
+                <div class="config-status" id="gpio-status">
+                    <p><i class="fas fa-info-circle"></i> Changes will be applied to all PiEEG scripts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Socket.IO
+        const socket = io();
+        
+        // Chart variables
+        let brainwaveChart;
+        let historicalChart;
+        let isRecording = false;
+        let recordedData = [];
+        
+        // Initialize charts
+        function initCharts() {
+            // Real-time brainwave chart
+            const ctx1 = document.getElementById('brainwaveChart').getContext('2d');
+            brainwaveChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Theta',
+                            data: [],
+                            borderColor: '#ff6b6b',
+                            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Alpha',
+                            data: [],
+                            borderColor: '#4ecdc4',
+                            backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Beta',
+                            data: [],
+                            borderColor: '#45b7d1',
+                            backgroundColor: 'rgba(69, 183, 209, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Gamma',
+                            data: [],
+                            borderColor: '#f9ca24',
+                            backgroundColor: 'rgba(249, 202, 36, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // Historical chart
+            const ctx2 = document.getElementById('historicalChart').getContext('2d');
+            historicalChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Last 5min', 'Last 10min', 'Last 15min', 'Last 20min'],
+                    datasets: [{
+                        label: 'Average Power',
+                        data: [0, 0, 0, 0],
+                        backgroundColor: [
+                            'rgba(255, 107, 107, 0.8)',
+                            'rgba(78, 205, 196, 0.8)',
+                            'rgba(69, 183, 209, 0.8)',
+                            'rgba(249, 202, 36, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        // Update AI analysis display
+        function updateAIAnalysis(data) {
+            document.getElementById('ai-analysis-text').textContent = data.analysis || 'Analyzing...';
+            document.getElementById('mood-text').textContent = data.mood_assessment || 'Unknown';
+            
+            // Update recommendations
+            const list = document.getElementById('recommendations-list');
+            list.innerHTML = '';
+            (data.recommendations || []).forEach(rec => {
+                const li = document.createElement('li');
+                li.textContent = rec;
+                list.appendChild(li);
+            });
+        }
+
+        // Socket event listeners
+        socket.on('connect', function() {
+            console.log('Connected to server');
+        });
+
+        socket.on('brainwave_data', function(data) {
+            updateBrainwaveDisplay(data);
+        });
+
+        socket.on('ai_analysis', function(data) {
+            updateAIAnalysis(data);
+        });
+
+        socket.on('mqtt_status', function(data) {
+            const statusDot = document.getElementById('mqtt-status');
+            const statusText = document.getElementById('mqtt-text');
+            
+            if (data.connected) {
+                statusDot.classList.add('connected');
+                statusText.textContent = 'MQTT: Connected';
+            } else {
+                statusDot.classList.remove('connected');
+                statusText.textContent = 'MQTT: Disconnected';
+            }
+        });
+
+        // Control functions
+        function saveForAnalysis() {
+            fetch('/api/save-for-analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'saved') {
+                    // Show instructions
+                    document.getElementById('claude-instructions').style.display = 'block';
+                    
+                    // Scroll to instructions
+                    document.getElementById('claude-instructions').scrollIntoView({ 
+                        behavior: 'smooth' 
+                    });
+                    
+                    console.log('Data saved for Claude Code analysis:', data.filepath);
+                } else {
+                    alert('Error saving data: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to save data for analysis');
+            });
+        }
+
+        function requestAnalysis() {
+            saveForAnalysis(); // Use the same function
+        }
+
+        function toggleRecording() {
+            isRecording = !isRecording;
+            const button = document.getElementById('record-text');
+            
+            if (isRecording) {
+                button.textContent = 'Stop Recording';
+                recordedData = [];
+            } else {
+                button.textContent = 'Start Recording';
+            }
+        }
+
+        function exportData() {
+            if (recordedData.length === 0) {
+                alert('No data to export. Start recording first.');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(recordedData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'brainwave_data_' + new Date().toISOString().split('T')[0] + '.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Electrode activity simulation (replace with real channel data when available)
+        let channelData = Array(16).fill(0);
+        
+        // Initialize brain map interactions
+        function initBrainMap() {
+            const electrodes = document.querySelectorAll('.electrode');
+            const tooltip = document.getElementById('electrode-tooltip');
+            
+            electrodes.forEach(electrode => {
+                // Mouse enter - show tooltip
+                electrode.addEventListener('mouseenter', function(e) {
+                    const channel = this.getAttribute('data-channel');
+                    const label = this.getAttribute('data-label');
+                    const activity = channelData[channel - 1] || 0;
+                    
+                    tooltip.innerHTML = `
+                        <strong>${label} (Ch${channel})</strong><br>
+                        Activity: ${(activity * 1000).toFixed(3)} μV<br>
+                        Click for details
+                    `;
+                    tooltip.classList.add('show');
+                });
+                
+                // Mouse move - position tooltip
+                electrode.addEventListener('mousemove', function(e) {
+                    const rect = e.target.getBoundingClientRect();
+                    tooltip.style.left = (rect.left + rect.width / 2 - 50) + 'px';
+                    tooltip.style.top = (rect.top - 60) + 'px';
+                });
+                
+                // Mouse leave - hide tooltip
+                electrode.addEventListener('mouseleave', function() {
+                    tooltip.classList.remove('show');
+                });
+                
+                // Click - show detailed info
+                electrode.addEventListener('click', function() {
+                    const channel = this.getAttribute('data-channel');
+                    const label = this.getAttribute('data-label');
+                    const activity = channelData[channel - 1] || 0;
+                    
+                    alert(`Electrode ${label} (Channel ${channel})\n` +
+                          `Current Activity: ${(activity * 1000).toFixed(3)} μV\n` +
+                          `Position: ${getElectrodeDescription(label)}`);
+                });
+            });
+        }
+        
+        // Get electrode position description
+        function getElectrodeDescription(label) {
+            const descriptions = {
+                'Fp1': 'Left Frontal Pole - emotion, planning',
+                'Fp2': 'Right Frontal Pole - emotion, planning', 
+                'F7': 'Left Frontal - speech, language',
+                'F3': 'Left Frontal - motor planning, working memory',
+                'Fz': 'Frontal Midline - attention, cognitive control',
+                'F4': 'Right Frontal - motor planning, working memory',
+                'F8': 'Right Frontal - speech, language',
+                'T3': 'Left Temporal - auditory processing, language',
+                'C3': 'Left Central - motor cortex, movement',
+                'Cz': 'Central Midline - motor control, balance',
+                'C4': 'Right Central - motor cortex, movement', 
+                'T4': 'Right Temporal - auditory processing',
+                'P3': 'Left Parietal - spatial processing, attention',
+                'Pz': 'Parietal Midline - spatial attention',
+                'P4': 'Right Parietal - spatial processing, attention',
+                'Oz': 'Occipital Midline - visual processing'
+            };
+            return descriptions[label] || 'Brain activity monitoring';
+        }
+        
+        // Update electrode activity visualization
+        function updateElectrodeActivity(data) {
+            // In a real implementation, you would get individual channel data
+            // For now, we'll simulate based on overall brainwave activity
+            const totalActivity = (data.theta_power + data.alpha_power + 
+                                   data.beta_power + data.gamma_power) / 4;
+            
+            // Simulate different activity levels across channels
+            // (replace this with real channel-specific data)
+            for (let i = 0; i < 16; i++) {
+                // Add some variation based on brain regions
+                let regionMultiplier = 1;
+                if (i < 7) regionMultiplier = data.beta_power * 2; // Frontal
+                else if (i < 12) regionMultiplier = data.alpha_power * 2; // Central
+                else regionMultiplier = data.theta_power * 2; // Posterior
+                
+                channelData[i] = totalActivity * regionMultiplier * (0.8 + Math.random() * 0.4);
+                
+                // Update electrode appearance
+                const electrode = document.getElementById(`ch${i + 1}`);
+                if (electrode) {
+                    electrode.classList.remove('active', 'medium', 'low');
+                    
+                    if (channelData[i] > 0.003) {
+                        electrode.classList.add('active');
+                    } else if (channelData[i] > 0.001) {
+                        electrode.classList.add('medium');
+                    } else if (channelData[i] > 0.0005) {
+                        electrode.classList.add('low');
+                    }
+                }
+            }
+        }
+        
+        // Enhanced brainwave display update to include electrode activity
+        function updateBrainwaveDisplay(data) {
+            const current = data.current;
+            const analysis = data.analysis;
+            
+            // Update values
+            document.getElementById('theta-value').textContent = current.theta_power.toFixed(6);
+            document.getElementById('alpha-value').textContent = current.alpha_power.toFixed(6);
+            document.getElementById('beta-value').textContent = current.beta_power.toFixed(6);
+            document.getElementById('gamma-value').textContent = current.gamma_power.toFixed(6);
+            
+            // Update dominant wave highlighting
+            document.querySelectorAll('.brainwave-item').forEach(item => {
+                item.classList.remove('dominant');
+            });
+            document.getElementById(current.dominant_wave + '-item').classList.add('dominant');
+            
+            // Update electrode activity visualization
+            updateElectrodeActivity(current);
+            
+            // Update stats
+            if (analysis) {
+                document.getElementById('stress-level').textContent = Math.round(analysis.stress_level) + '%';
+                document.getElementById('focus-level').textContent = Math.round(analysis.focus_level) + '%';
+                document.getElementById('relaxation-level').textContent = Math.round(analysis.relaxation_level) + '%';
+            }
+            
+            // Update chart
+            const now = new Date().toLocaleTimeString();
+            brainwaveChart.data.labels.push(now);
+            brainwaveChart.data.datasets[0].data.push(current.theta_power);
+            brainwaveChart.data.datasets[1].data.push(current.alpha_power);
+            brainwaveChart.data.datasets[2].data.push(current.beta_power);
+            brainwaveChart.data.datasets[3].data.push(current.gamma_power);
+            
+            // Keep only last 50 data points
+            if (brainwaveChart.data.labels.length > 50) {
+                brainwaveChart.data.labels.shift();
+                brainwaveChart.data.datasets.forEach(dataset => {
+                    dataset.data.shift();
+                });
+            }
+            
+            brainwaveChart.update('none');
+            
+            // Update last update time
+            document.getElementById('last-update').textContent = 'Last update: ' + new Date().toLocaleTimeString();
+            
+            // Record data if recording is active
+            if (isRecording) {
+                recordedData.push({
+                    timestamp: new Date().toISOString(),
+                    ...current
+                });
+            }
+        }
+
+        // GPIO Configuration Functions
+        function toggleGPIOConfig() {
+            const configCard = document.getElementById('gpio-config-card');
+            configCard.style.display = configCard.style.display === 'none' ? 'block' : 'none';
+            
+            if (configCard.style.display === 'block') {
+                loadCurrentGPIOConfig();
+                configCard.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        function loadCurrentGPIOConfig() {
+            fetch('/api/gpio-config')
+                .then(response => response.json())
+                .then(config => {
+                    document.getElementById('cs-pin').value = config.cs_pin || '19';
+                    document.getElementById('button1-pin').value = config.button_pin_1 || '26';
+                    document.getElementById('button2-pin').value = config.button_pin_2 || '13';
+                    document.getElementById('gpio-chip').value = config.gpio_chip || '0';
+                    
+                    updateGPIOStatus('Loaded current configuration', 'success');
+                })
+                .catch(error => {
+                    console.error('Error loading GPIO config:', error);
+                    updateGPIOStatus('Failed to load configuration', 'error');
+                });
+        }
+        
+        function saveGPIOConfig() {
+            const config = {
+                cs_pin: parseInt(document.getElementById('cs-pin').value),
+                button_pin_1: parseInt(document.getElementById('button1-pin').value),
+                button_pin_2: parseInt(document.getElementById('button2-pin').value),
+                gpio_chip: document.getElementById('gpio-chip').value
+            };
+            
+            // Validate no duplicate pins
+            const pins = [config.cs_pin, config.button_pin_1, config.button_pin_2];
+            const uniquePins = new Set(pins);
+            if (uniquePins.size !== pins.length) {
+                updateGPIOStatus('Error: Cannot use the same pin for multiple functions!', 'error');
+                return;
+            }
+            
+            // Send configuration to server
+            fetch('/api/gpio-config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(config)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    updateGPIOStatus('Configuration saved! Restart PiEEG scripts to apply changes.', 'success');
+                } else {
+                    updateGPIOStatus('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving GPIO config:', error);
+                updateGPIOStatus('Failed to save configuration', 'error');
+            });
+        }
+        
+        function resetGPIOConfig() {
+            if (confirm('Reset GPIO configuration to defaults?\n\nCS Pin: GPIO 19\nButton 1: GPIO 26\nButton 2: GPIO 13')) {
+                document.getElementById('cs-pin').value = '19';
+                document.getElementById('button1-pin').value = '26';
+                document.getElementById('button2-pin').value = '13';
+                document.getElementById('gpio-chip').value = '0';
+                
+                saveGPIOConfig();
+            }
+        }
+        
+        function updateGPIOStatus(message, type) {
+            const statusDiv = document.getElementById('gpio-status');
+            statusDiv.innerHTML = `<p><i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i> ${message}</p>`;
+            statusDiv.className = 'config-status ' + type;
+            
+            // Reset status after 5 seconds
+            setTimeout(() => {
+                statusDiv.className = 'config-status';
+                statusDiv.innerHTML = '<p><i class="fas fa-info-circle"></i> Changes will be applied to all PiEEG scripts</p>';
+            }, 5000);
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            initBrainMap();
+        });
+    </script>
+</body>
+</html>

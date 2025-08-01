@@ -1,0 +1,28 @@
+[project]
+name = "pieeg-16"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "gpiod==1.5.4",
+    "matplotlib===3.9.2",
+    "notebook>=7.4.2",
+    "numpy>=1.24.0",
+    "paho-mqtt>=1.6.1",
+    "pandas>=2.2.3",
+    "scipy===1.14.1",
+    "spicy===0.16.0",
+    "spidev===3.6",
+    "flask>=2.3.0",
+    "flask-socketio>=5.3.0",
+    "anthropic>=0.8.0",
+    "python-socketio>=5.8.0",
+    "eventlet>=0.33.0",
+    "requests>=2.31.0",
+]
+
+[tool.uv.workspace]
+members = [
+    "ML_Application",
+]
