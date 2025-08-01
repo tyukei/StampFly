@@ -10,6 +10,7 @@
 #include "sensor.hpp"
 #include "led.hpp"
 #include "telemetry.hpp"
+#include "pieeg_mqtt.hpp"
 
 //モータPWM出力Pinのアサイン
 //Motor PWM Pin
@@ -222,6 +223,24 @@ void init_copter(void)
   //Initilize Radio control
   rc_init();
 
+  //Initialize MQTT
+  if (initMQTT("192.168.1.100")) {
+    USBSerial.printf("MQTT initialized\r\n");
+    // EEGデータ受信時のコールバック設定
+    setEEGDataCallback([](float eegValue, unsigned long timestamp) {
+      // EEG値に基づいて飛行モードを調整
+      if (eegValue > 2.5f) {
+        // 高集中度：高度を上げる
+        Throttle_command += 5.0f;
+      } else if (eegValue < 1.0f) {
+        // 低集中度：高度を下げる
+        Throttle_command -= 5.0f;
+      }
+    });
+  } else {
+    USBSerial.printf("MQTT init failed\r\n");
+  }
+
   //割り込み設定
   //Initialize intrupt
   timer = timerBegin(0, 80, true);
@@ -253,6 +272,9 @@ void loop_400Hz(void)
 
   //LED Drive
   led_drive();
+  
+  //MQTT処理
+  mqttLoop();
   
   //Begin Mode select
   if (Mode == INIT_MODE)
@@ -298,6 +320,13 @@ void loop_400Hz(void)
 
     //Rate Control
     rate_control();
+    
+    //MQTTで飛行データ送信（10Hz）
+    static uint32_t lastMqttSend = 0;
+    if (millis() - lastMqttSend > 100) {
+      publishFlightData(Roll_angle, Pitch_angle, Yaw_angle, Altitude);
+      lastMqttSend = millis();
+    }
   }
   else if(Mode == PARKING_MODE)
   {
