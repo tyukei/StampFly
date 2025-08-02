@@ -82,7 +82,7 @@ void OnDataRecv(const uint8_t *mac_addr, const uint8_t *recv_data, int data_len)
 
 
 #if 0
-  USBSerial.printf("%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f  %6.3f\n\r", 
+  Serial.printf("%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f  %6.3f\n\r", 
                                             Stick[THROTTLE],
                                             Stick[AILERON],
                                             Stick[ELEVATOR],
@@ -111,13 +111,13 @@ void rc_init(void)
   WiFi.disconnect();
 
   WiFi.macAddress((uint8_t*)MyMacAddr);
-  USBSerial.printf("MAC ADDRESS: %02X:%02X:%02X:%02X:%02X:%02X\r\n", 
+  Serial.printf("MAC ADDRESS: %02X:%02X:%02X:%02X:%02X:%02X\r\n", 
                   MyMacAddr[0], MyMacAddr[1], MyMacAddr[2], MyMacAddr[3], MyMacAddr[4], MyMacAddr[5]);
 
   if (esp_now_init() == ESP_OK) {
-    USBSerial.println("ESPNow Init Success");
+    Serial.println("ESPNow Init Success");
   } else {
-    USBSerial.println("ESPNow Init Failed");
+    Serial.println("ESPNow Init Failed");
     ESP.restart();
   }
 
@@ -128,7 +128,7 @@ void rc_init(void)
   peerInfo.encrypt = false;
   if (esp_now_add_peer(&peerInfo) != ESP_OK) 
   {
-        USBSerial.println("Failed to add peer");
+        Serial.println("Failed to add peer");
         return;
   }
   esp_wifi_set_channel(CHANNEL, WIFI_SECOND_CHAN_NONE);
@@ -138,16 +138,16 @@ void rc_init(void)
   {
     send_peer_info();
     delay(50);
-    //USBSerial.printf("%d\n", i);
+    //Serial.printf("%d\n", i);
   }
 
   // ESP-NOW再初期化
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   if (esp_now_init() == ESP_OK) {
-    USBSerial.println("ESPNow Init Success2");
+    Serial.println("ESPNow Init Success2");
   } else {
-    USBSerial.println("ESPNow Init Failed2");
+    Serial.println("ESPNow Init Failed2");
     ESP.restart();
   }
 
@@ -157,13 +157,13 @@ void rc_init(void)
   peerInfo.encrypt = false;
   if (esp_now_add_peer(&peerInfo) != ESP_OK) 
   {
-        USBSerial.println("Failed to add peer2");
+        Serial.println("Failed to add peer2");
         return;
   }
   // ESP-NOWコールバック登録
   esp_now_register_recv_cb(OnDataRecv);
   esp_now_register_send_cb(on_esp_now_sent);
-  USBSerial.println("ESP-NOW Ready.");
+  Serial.println("ESP-NOW Ready.");
 }
 
 void send_peer_info(void)
@@ -206,7 +206,7 @@ uint8_t telemetry_send(uint8_t* data, uint16_t datalen)
     cnt = 0;
   }
   cnt++;
-  //USBSerial.printf("%6d %d %d\r\n", cnt, error_flag, esp_now_send_status);
+  //Serial.printf("%6d %d %d\r\n", cnt, error_flag, esp_now_send_status);
 
   return error_flag;
 }
@@ -222,7 +222,7 @@ uint8_t rc_isconnected(void)
     Connect_flag++;
     if (Connect_flag<10)status = 1;
     else status = 0;
-    //USBSerial.printf("%d \n\r", Connect_flag);
+    //Serial.printf("%d \n\r", Connect_flag);
     return status;
 }
 

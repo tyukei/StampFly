@@ -37,7 +37,7 @@ void tof_init(void)
   ToF_front->i2c_slave_address = 0x29;
 
 
-  //USBSerial.printf("#tof_i2c_init_status:%d\r\n",vl53lx_i2c_init());  
+  //Serial.printf("#tof_i2c_init_status:%d\r\n",vl53lx_i2c_init());  
 
   //ToF Pin Initialize
   pinMode(XSHUT_BOTTOM, OUTPUT);
@@ -60,34 +60,34 @@ void tof_init(void)
   digitalWrite(XSHUT_BOTTOM, HIGH);
 
   //Bttom ToF setting
-  USBSerial.printf("#1 WaitDeviceBooted Status:%d\n\r",VL53LX_WaitDeviceBooted(ToF_bottom));
-  USBSerial.printf("#1 DataInit Status:%d\n\r",VL53LX_DataInit(ToF_bottom));
-  USBSerial.printf("#1 Range setting  Status:%d\n\r", VL53LX_SetDistanceMode(ToF_bottom, VL53LX_DISTANCEMODE_MEDIUM));
-  USBSerial.printf("#1 SetMeasurementTimingBuget Status:%d\n\r",VL53LX_SetMeasurementTimingBudgetMicroSeconds(ToF_bottom, 33000));
-  USBSerial.printf("#1 RdByte Status:%d\n\r", VL53LX_RdByte(ToF_bottom, 0x010F, &byteData));
-  USBSerial.printf("#1 VL53LX Model_ID: %02X\n\r", byteData);  
-  USBSerial.printf("#1 RdByte Status:%d\n\r", VL53LX_RdByte(ToF_bottom, 0x0110, &byteData));
-  USBSerial.printf("#1 VL53LX Module_Type: %02X\n\r", byteData);
-  USBSerial.printf("#1 RdWord Status:%d\n\r", VL53LX_RdWord(ToF_bottom, 0x010F, &wordData));
-  USBSerial.printf("#1 VL53LX: %04X\n\r", wordData);
+  Serial.printf("#1 WaitDeviceBooted Status:%d\n\r",VL53LX_WaitDeviceBooted(ToF_bottom));
+  Serial.printf("#1 DataInit Status:%d\n\r",VL53LX_DataInit(ToF_bottom));
+  Serial.printf("#1 Range setting  Status:%d\n\r", VL53LX_SetDistanceMode(ToF_bottom, VL53LX_DISTANCEMODE_MEDIUM));
+  Serial.printf("#1 SetMeasurementTimingBuget Status:%d\n\r",VL53LX_SetMeasurementTimingBudgetMicroSeconds(ToF_bottom, 33000));
+  Serial.printf("#1 RdByte Status:%d\n\r", VL53LX_RdByte(ToF_bottom, 0x010F, &byteData));
+  Serial.printf("#1 VL53LX Model_ID: %02X\n\r", byteData);  
+  Serial.printf("#1 RdByte Status:%d\n\r", VL53LX_RdByte(ToF_bottom, 0x0110, &byteData));
+  Serial.printf("#1 VL53LX Module_Type: %02X\n\r", byteData);
+  Serial.printf("#1 RdWord Status:%d\n\r", VL53LX_RdWord(ToF_bottom, 0x010F, &wordData));
+  Serial.printf("#1 VL53LX: %04X\n\r", wordData);
   
   //Front ToF Setting
-  USBSerial.printf("#2 WaitDeviceBooted Status:%d\n\r",VL53LX_WaitDeviceBooted(ToF_front));
-  USBSerial.printf("#2 DataInit Status:%d\n\r",VL53LX_DataInit(ToF_front));
-  USBSerial.printf("#1 Range setting  Status:%d\n\r", VL53LX_SetDistanceMode(ToF_front, VL53LX_DISTANCEMODE_LONG));
-  USBSerial.printf("#2 SetMeasurementTimingBuget Status:%d\n\r",VL53LX_SetMeasurementTimingBudgetMicroSeconds(ToF_front, 33000));
-  USBSerial.printf("#2 RdByte Status:%d\n\r", VL53LX_RdByte(ToF_front, 0x010F, &byteData));
-  USBSerial.printf("#2 VL53LX Model_ID: %02X\n\r", byteData);  
-  USBSerial.printf("#2 RdByte Status:%d\n\r", VL53LX_RdByte(ToF_front, 0x0110, &byteData));
-  USBSerial.printf("#2 VL53LX Module_Type: %02X\n\r", byteData);
-  USBSerial.printf("#2 RdWord Status:%d\n\r", VL53LX_RdWord(ToF_front, 0x010F, &wordData));
-  USBSerial.printf("#2 VL53LX: %04X\n\r", wordData);
+  Serial.printf("#2 WaitDeviceBooted Status:%d\n\r",VL53LX_WaitDeviceBooted(ToF_front));
+  Serial.printf("#2 DataInit Status:%d\n\r",VL53LX_DataInit(ToF_front));
+  Serial.printf("#1 Range setting  Status:%d\n\r", VL53LX_SetDistanceMode(ToF_front, VL53LX_DISTANCEMODE_LONG));
+  Serial.printf("#2 SetMeasurementTimingBuget Status:%d\n\r",VL53LX_SetMeasurementTimingBudgetMicroSeconds(ToF_front, 33000));
+  Serial.printf("#2 RdByte Status:%d\n\r", VL53LX_RdByte(ToF_front, 0x010F, &byteData));
+  Serial.printf("#2 VL53LX Model_ID: %02X\n\r", byteData);  
+  Serial.printf("#2 RdByte Status:%d\n\r", VL53LX_RdByte(ToF_front, 0x0110, &byteData));
+  Serial.printf("#2 VL53LX Module_Type: %02X\n\r", byteData);
+  Serial.printf("#2 RdWord Status:%d\n\r", VL53LX_RdWord(ToF_front, 0x010F, &wordData));
+  Serial.printf("#2 VL53LX: %04X\n\r", wordData);
 
   attachInterrupt(INT_BOTTOM, &tof_int, FALLING);
 
   VL53LX_ClearInterruptAndStartMeasurement(ToF_bottom);
   delay(100);
-  USBSerial.printf("#Start Measurement Status:%d\n\r", VL53LX_StartMeasurement(ToF_bottom));
+  Serial.printf("#Start Measurement Status:%d\n\r", VL53LX_StartMeasurement(ToF_bottom));
 
 }
 
@@ -105,9 +105,9 @@ uint16_t tof_range_get(VL53LX_DEV dev)
   //uint32_t start_time = micros();
   VL53LX_GetMultiRangingData(dev, pMultiRangingData);
   //uint32_t end_time = micros();
-  //USBSerial.printf("ToF Time%f\n", (float)(end_time - start_time)*1.0e-6);
+  //Serial.printf("ToF Time%f\n", (float)(end_time - start_time)*1.0e-6);
   uint8_t no_of_object_found=pMultiRangingData->NumberOfObjectsFound;
-  //USBSerial.printf("No=%d\n\r",no_of_object_found);
+  //Serial.printf("No=%d\n\r",no_of_object_found);
   range_min = 10000;
   range_max = 0;
   range_ave = 0;
@@ -129,7 +129,7 @@ uint16_t tof_range_get(VL53LX_DEV dev)
                     range_ave = range_ave + range;
                   }
                   if(count!=0)range_ave = range_ave / count;
-                  //USBSerial.printf("No %d Status=%d Range %d mm\n\r",j, MultiRangingData.RangeData[j].RangeStatus,MultiRangingData.RangeData[j].RangeMaxMilliMeter);
+                  //Serial.printf("No %d Status=%d Range %d mm\n\r",j, MultiRangingData.RangeData[j].RangeStatus,MultiRangingData.RangeData[j].RangeMaxMilliMeter);
     }     
   }
   VL53LX_ClearInterruptAndStartMeasurement(dev);
@@ -148,9 +148,9 @@ void tof_test_ranging(VL53LX_DEV dev)
     status = VL53LX_ClearInterruptAndStartMeasurement(dev);
   }
   delay(100);
-  USBSerial.printf("#Start Measurement Status:%d\n\r", VL53LX_StartMeasurement(dev));
+  Serial.printf("#Start Measurement Status:%d\n\r", VL53LX_StartMeasurement(dev));
 
-  USBSerial.printf("#Count ObjNo Status Range Signal(Mcps) Ambient(Mcps)\n\r");
+  Serial.printf("#Count ObjNo Status Range Signal(Mcps) Ambient(Mcps)\n\r");
 
   u_long st, now, old, end;
   uint16_t count;
@@ -159,7 +159,7 @@ void tof_test_ranging(VL53LX_DEV dev)
   old = st;
 
   count = 0;
-  USBSerial.printf("Start!\n\r");
+  Serial.printf("Start!\n\r");
   while(count<500)
   {
     //VL53LX_WaitMeasurementDataReady(dev);
@@ -174,12 +174,12 @@ void tof_test_ranging(VL53LX_DEV dev)
       old = now;
       now=micros();
       uint8_t no_of_object_found=pMultiRangingData->NumberOfObjectsFound;
-      USBSerial.printf("%7.4f %7.4f ", (float)(now-st)*1e-6, (float)(now - old)*1e-6);
-      USBSerial.printf("%5d ", pMultiRangingData->StreamCount);
-      USBSerial.printf("%1d ", no_of_object_found);
+      Serial.printf("%7.4f %7.4f ", (float)(now-st)*1e-6, (float)(now - old)*1e-6);
+      Serial.printf("%5d ", pMultiRangingData->StreamCount);
+      Serial.printf("%1d ", no_of_object_found);
       for(uint8_t j=0;j<no_of_object_found;j++){
-        if(j!=0)USBSerial.printf("\n\r                     ");
-        USBSerial.printf("%d %5d %2.2f %2.2f ",
+        if(j!=0)Serial.printf("\n\r                     ");
+        Serial.printf("%d %5d %2.2f %2.2f ",
                 MultiRangingData.RangeData[j].RangeStatus,
                 MultiRangingData.RangeData[j].RangeMilliMeter,
                 MultiRangingData.RangeData[j].SignalRateRtnMegaCps/65536.0,
@@ -188,12 +188,12 @@ void tof_test_ranging(VL53LX_DEV dev)
       
       VL53LX_ClearInterruptAndStartMeasurement(dev);
       end=micros();
-      USBSerial.printf ("%8.6f", (float)(end-now)*1.0e-6);
-      USBSerial.printf ("\n\r");
+      Serial.printf ("%8.6f", (float)(end-now)*1.0e-6);
+      Serial.printf ("\n\r");
 
     }
   }
-  USBSerial.printf("End!\n\r");
+  Serial.printf("End!\n\r");
 
 }
 

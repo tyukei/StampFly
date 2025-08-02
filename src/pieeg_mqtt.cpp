@@ -53,42 +53,42 @@ void setEEGDataCallback(void (*callback)(float, unsigned long)) {
 
 bool initMQTT(const char* mqtt_server, int port) {
     // WiFi接続
-    USBSerial.printf("WiFi connecting to: %s\r\n", ssid);
+    Serial.printf("WiFi connecting to: %s\r\n", ssid);
     WiFi.begin(ssid, password);
-    USBSerial.printf("WiFi接続中");
+    Serial.printf("WiFi接続中");
     
     int attempts = 0;
     while (WiFi.status() != WL_CONNECTED && attempts < 20) {
         delay(500);
-        USBSerial.printf(".");
+        Serial.printf(".");
         attempts++;
     }
     
     if (WiFi.status() != WL_CONNECTED) {
-        USBSerial.printf("\nWiFi接続失敗 - Status: %d\r\n", WiFi.status());
+        Serial.printf("\nWiFi接続失敗 - Status: %d\r\n", WiFi.status());
         return false;
     }
     
-    USBSerial.printf("\nWiFi接続完了\r\n");
-    USBSerial.printf("IPアドレス: %s\r\n", WiFi.localIP().toString().c_str());
-    USBSerial.printf("サブネットマスク: %s\r\n", WiFi.subnetMask().toString().c_str());
-    USBSerial.printf("ゲートウェイ: %s\r\n", WiFi.gatewayIP().toString().c_str());
-    USBSerial.printf("DNS: %s\r\n", WiFi.dnsIP().toString().c_str());
+    Serial.printf("\nWiFi接続完了\r\n");
+    Serial.printf("IPアドレス: %s\r\n", WiFi.localIP().toString().c_str());
+    Serial.printf("サブネットマスク: %s\r\n", WiFi.subnetMask().toString().c_str());
+    Serial.printf("ゲートウェイ: %s\r\n", WiFi.gatewayIP().toString().c_str());
+    Serial.printf("DNS: %s\r\n", WiFi.dnsIP().toString().c_str());
     
     // MQTT設定
-    USBSerial.printf("Setting MQTT server: %s:%d\r\n", mqtt_server, port);
+    Serial.printf("Setting MQTT server: %s:%d\r\n", mqtt_server, port);
     mqttClient.setServer(mqtt_server, port);
     mqttClient.setCallback(mqttCallback);
     
     // MQTT接続テスト
-    USBSerial.printf("Testing MQTT connection...\r\n");
+    Serial.printf("Testing MQTT connection...\r\n");
     if (mqttClient.connect("StampS3_TestClient")) {
-        USBSerial.printf("MQTT connection successful!\r\n");
+        Serial.printf("MQTT connection successful!\r\n");
         mqttClient.subscribe("pieeg/data");
-        USBSerial.printf("Subscribed to pieeg/data\r\n");
+        Serial.printf("Subscribed to pieeg/data\r\n");
         return true;
     } else {
-        USBSerial.printf("MQTT connection failed, state: %d\r\n", mqttClient.state());
+        Serial.printf("MQTT connection failed, state: %d\r\n", mqttClient.state());
         return false;
     }
 }

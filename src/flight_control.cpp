@@ -209,16 +209,16 @@ void init_copter(void)
   led_show();
  
   //Initialize Serial communication
-  USBSerial.begin(115200);
+  Serial.begin(115200);
   delay(1500);
-  USBSerial.printf("Start StampS3FPV!\r\n");
+  Serial.printf("Start StampS3FPV!\r\n");
   
   //Initialize PWM
   init_pwm();
   
   // EEGモード：センサーをスキップしてWiFi/MQTTのみ初期化
   minimal_sensor_init();
-  USBSerial.printf("Finish sensor init (EEG mode)!\r\n");
+  Serial.printf("Finish sensor init (EEG mode)!\r\n");
 
   //PID GAIN and etc. Init
   control_init();
@@ -227,49 +227,49 @@ void init_copter(void)
   rc_init();
 
   //Initialize MQTT (optional for EEG mode)
-  USBSerial.printf("Attempting MQTT connection to 192.168.72.60:1883\r\n");
+  Serial.printf("Attempting MQTT connection to 192.168.72.60:1883\r\n");
   if (initMQTT("192.168.72.60")) {
-    USBSerial.printf("MQTT initialized successfully\r\n");
+    Serial.printf("MQTT initialized successfully\r\n");
     // EEGデータ受信時のコールバック設定
     setEEGDataCallback([](float eegValue, unsigned long timestamp) {
       // EEG値に基づいてLED色を変更（基礎実験）
       update_eeg_led(eegValue);
       
       // シリアル出力でEEG値をモニタリング
-      USBSerial.printf("EEG: %.2f, LED Color: 0x%06X\r\n", eegValue, get_eeg_color(eegValue));
+      Serial.printf("EEG: %.2f, LED Color: 0x%06X\r\n", eegValue, get_eeg_color(eegValue));
     });
   } else {
-    USBSerial.printf("MQTT init failed - continuing in EEG Simulation Mode\r\n");
-    USBSerial.printf("Starting autonomous EEG LED simulation...\r\n");
+    Serial.printf("MQTT init failed - continuing in EEG Simulation Mode\r\n");
+    Serial.printf("Starting autonomous EEG LED simulation...\r\n");
     
     // 初期LED表示テスト
-    USBSerial.printf("Initial LED color test:\r\n");
+    Serial.printf("Initial LED color test:\r\n");
     
     // 青色テスト
     update_eeg_led(0.3f);
-    USBSerial.printf("LED -> Blue (EEG: 0.3)\r\n");
+    Serial.printf("LED -> Blue (EEG: 0.3)\r\n");
     delay(1000);
     
     // 緑色テスト  
     update_eeg_led(1.0f);
-    USBSerial.printf("LED -> Green (EEG: 1.0)\r\n");
+    Serial.printf("LED -> Green (EEG: 1.0)\r\n");
     delay(1000);
     
     // 赤色テスト
     update_eeg_led(2.0f);
-    USBSerial.printf("LED -> Red (EEG: 2.0)\r\n");
+    Serial.printf("LED -> Red (EEG: 2.0)\r\n");
     delay(1000);
     
     // マゼンタテスト
     update_eeg_led(3.0f);
-    USBSerial.printf("LED -> Magenta (EEG: 3.0)\r\n");
+    Serial.printf("LED -> Magenta (EEG: 3.0)\r\n");
     delay(1000);
     
     // 白色テスト
     update_eeg_led(4.5f);
-    USBSerial.printf("LED -> White (EEG: 4.5)\r\n");
+    Serial.printf("LED -> White (EEG: 4.5)\r\n");
     
-    USBSerial.printf("Initial test complete! Starting continuous simulation...\r\n");
+    Serial.printf("Initial test complete! Starting continuous simulation...\r\n");
   }
 
   //割り込み設定
@@ -278,8 +278,8 @@ void init_copter(void)
   timerAttachInterrupt(timer, &onTimer, true);
   timerAlarmWrite(timer, 2500, true);
   timerAlarmEnable(timer);
-  USBSerial.printf("Finish StampFly init!\r\n");
-  USBSerial.printf("Enjoy Flight!\r\n");
+  Serial.printf("Finish StampFly init!\r\n");
+  Serial.printf("Enjoy Flight!\r\n");
 }
 
 //Main loop
@@ -309,7 +309,7 @@ void loop_400Hz(void)
   static uint32_t debug_counter = 0;
   debug_counter++;
   if (debug_counter % 800 == 0) { // Every 2 seconds
-    USBSerial.printf("Loop running - Time: %.1fs\r\n", Timevalue);
+    Serial.printf("Loop running - Time: %.1fs\r\n", Timevalue);
   }
   
   //MQTT処理 (safe call)
@@ -329,7 +329,7 @@ void loop_400Hz(void)
     // MQTTクライアントが接続されていない場合はシミュレーション開始
     if (!mqttClient.connected()) {
       mqtt_failed = true;
-      USBSerial.printf("MQTT not connected - starting EEG simulation mode\r\n");
+      Serial.printf("MQTT not connected - starting EEG simulation mode\r\n");
     }
     first_mqtt_check = false;
   }
@@ -360,7 +360,7 @@ void loop_400Hz(void)
       
       // LED更新
       update_eeg_led(eeg_value);
-      USBSerial.printf("EEG Simulation: %.1f -> Color: 0x%06X\r\n", eeg_value, get_eeg_color(eeg_value));
+      Serial.printf("EEG Simulation: %.1f -> Color: 0x%06X\r\n", eeg_value, get_eeg_color(eeg_value));
     }
   }
   

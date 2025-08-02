@@ -38,7 +38,7 @@ void Alt_kalman::update(float z_sens, float accel, float h)
   p31_ = (1+beta*step)*(p31-step*p33);
   p32_ = (1+beta*step)*(p32+step*p31);
   p33_ = (1+beta*step)*(1+beta*step)*p33 + step*step*q2;
-  //USBSerial.printf("%f %f %f  %f %f %f  %f %f %f\n\r",p11_,p12_,p13,p21_,p22_,p23_,p31_,p32_,p33_);
+  //Serial.printf("%f %f %f  %f %f %f  %f %f %f\n\r",p11_,p12_,p13,p21_,p22_,p23_,p31_,p32_,p33_);
 
 
   //update kalman gain

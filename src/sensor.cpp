@@ -50,7 +50,7 @@ volatile uint16_t Range=1000;
 
 uint8_t scan_i2c()
 {
-  USBSerial.println ("I2C scanner. Scanning ...");
+  Serial.println ("I2C scanner. Scanning ...");
   delay(50);
   byte count = 0;
   for (uint8_t i = 1; i < 127; i++)
@@ -58,17 +58,17 @@ uint8_t scan_i2c()
     Wire1.beginTransmission (i);          // Begin I2C transmission Address (i)
     if (Wire1.endTransmission () == 0)  // Receive 0 = success (ACK response) 
     {
-      USBSerial.print ("Found address: ");
-      USBSerial.print (i, DEC);
-      USBSerial.print (" (0x");
-      USBSerial.print (i, HEX); 
-      USBSerial.println (")");
+      Serial.print ("Found address: ");
+      Serial.print (i, DEC);
+      Serial.print (" (0x");
+      Serial.print (i, HEX); 
+      Serial.println (")");
       count++;
     }
   }
-  USBSerial.print ("Found ");      
-  USBSerial.print (count, DEC);        // numbers of devices
-  USBSerial.println (" device(s).");
+  Serial.print ("Found ");      
+  Serial.print (count, DEC);        // numbers of devices
+  Serial.println (" device(s).");
   return count;
 }
 
@@ -95,7 +95,7 @@ void test_voltage(void)
 {
   for (uint16_t i=0; i<1000; i++)
   {
-    USBSerial.printf("Voltage[%03d]:%f\n\r", i, ina3221.getVoltage(INA3221_CH2));
+    Serial.printf("Voltage[%03d]:%f\n\r", i, ina3221.getVoltage(INA3221_CH2));
   }
 }
 
@@ -111,8 +111,8 @@ void sensor_init()
   Wire1.begin(SDA_PIN, SCL_PIN,400000UL);
   if(scan_i2c()==0)
   {
-    USBSerial.printf("No I2C device!\r\n");
-    USBSerial.printf("Can not boot AtomFly2.\r\n");
+    Serial.printf("No I2C device!\r\n");
+    Serial.printf("Can not boot AtomFly2.\r\n");
     while(1);
   }
 
@@ -130,7 +130,7 @@ void sensor_init()
     {
       ToF_bottom_data_ready_flag = 0;
       cnt++;
-      USBSerial.printf("%d %d\n\r", cnt, tof_bottom_get_range());
+      Serial.printf("%d %d\n\r", cnt, tof_bottom_get_range());
     }
   }
   delay(10);
@@ -198,7 +198,7 @@ float sensor_read(void)
   gyro_y = imu_get_gyro_y();
   gyro_z = imu_get_gyro_z();
 
-  //USBSerial.printf("%9.6f %9.6f %9.6f\n\r", Elapsed_time, sens_interval, acc_z);
+  //Serial.printf("%9.6f %9.6f %9.6f\n\r", Elapsed_time, sens_interval, acc_z);
 
   //Axis Transform
   Accel_x_raw =  acc_y;
@@ -229,7 +229,7 @@ float sensor_read(void)
 
 
     //for debug
-    //USBSerial.printf("%6.3f %7.4f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f\n\r", 
+    //Serial.printf("%6.3f %7.4f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f\n\r", 
     //  Elapsed_time, Interval_time, acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z);
 
     //Get Altitude (30Hz)
@@ -265,7 +265,7 @@ float sensor_read(void)
           old_dist[2] = old_dist[1];
           old_dist[1] = dist;
         }
-        //USBSerial.printf("%9.6f, %9.6f, %9.6f, %9.6f, %9.6f\r\n",Elapsed_time,Altitude/1000.0,  Altitude2, Alt_velocity,-(Accel_z_raw - Accel_z_offset)*9.81/(-Accel_z_offset));
+        //Serial.printf("%9.6f, %9.6f, %9.6f, %9.6f, %9.6f\r\n",Elapsed_time,Altitude/1000.0,  Altitude2, Alt_velocity,-(Accel_z_raw - Accel_z_offset)*9.81/(-Accel_z_offset));
       }
     }
     else dcnt++;
@@ -278,7 +278,7 @@ float sensor_read(void)
     Altitude2 = EstimatedAltitude.Altitude;
     Alt_velocity = EstimatedAltitude.Velocity;
     Az_bias = EstimatedAltitude.Bias;
-    //USBSerial.printf("Sens=%f Az=%f Altitude=%f Velocity=%f Bias=%f\n\r",Altitude, Az, Altitude2, Alt_velocity, Az_bias);
+    //Serial.printf("Sens=%f Az=%f Altitude=%f Velocity=%f Bias=%f\n\r",Altitude, Az, Altitude2, Alt_velocity, Az_bias);
 
     //float Roll_angle = Roll_angle;
     //float tht = Pitch_angle;
@@ -319,12 +319,12 @@ float sensor_read(void)
   {
     opt_interval = 0.0;
     flow.readMotionCount(&deltaX, &deltaY);
-    USBSerial.printf("%f %d %d %f\r\n", Elapsed_time, deltaX, deltaY, Accel_z_raw);
+    Serial.printf("%f %d %d %f\r\n", Elapsed_time, deltaX, deltaY, Accel_z_raw);
   }
   */
 
   uint32_t et =micros();
-  //USBSerial.printf("Sensor read %f %f %f\n\r", (mt-st)*1.0e-6, (et-mt)*1e-6, (et-st)*1.0e-6);
+  //Serial.printf("Sensor read %f %f %f\n\r", (mt-st)*1.0e-6, (et-mt)*1e-6, (et-st)*1.0e-6);
 
   return (et-st)*1.0e-6;
 }
@@ -363,90 +363,90 @@ float z = r33*range;
 
 // I2C device scanner for debugging
 void i2c_scanner(void) {
-    USBSerial.printf("Scanning I2C devices...\r\n");
-    USBSerial.printf("SDA: GPIO%d, SCL: GPIO%d\r\n", SDA_PIN, SCL_PIN);
+    Serial.printf("Scanning I2C devices...\r\n");
+    Serial.printf("SDA: GPIO%d, SCL: GPIO%d\r\n", SDA_PIN, SCL_PIN);
     
     int deviceCount = 0;
     for (byte address = 1; address < 127; address++) {
         Wire1.beginTransmission(address);
         if (Wire1.endTransmission() == 0) {
-            USBSerial.printf("I2C device found at 0x%02X\r\n", address);
+            Serial.printf("I2C device found at 0x%02X\r\n", address);
             deviceCount++;
             
             // 既知のデバイスを表示
             switch (address) {
                 case 0x68:
-                    USBSerial.printf("  -> BMI270 (IMU)\r\n");
+                    Serial.printf("  -> BMI270 (IMU)\r\n");
                     break;
                 case 0x76:
-                    USBSerial.printf("  -> BMP280 (Barometer)\r\n");
+                    Serial.printf("  -> BMP280 (Barometer)\r\n");
                     break;
                 case 0x10:
-                    USBSerial.printf("  -> BMM150 (Magnetometer)\r\n");
+                    Serial.printf("  -> BMM150 (Magnetometer)\r\n");
                     break;
                 case 0x40:
-                    USBSerial.printf("  -> INA3221 (Power monitor)\r\n");
+                    Serial.printf("  -> INA3221 (Power monitor)\r\n");
                     break;
                 case 0x29:
-                    USBSerial.printf("  -> VL53L3C (ToF sensor)\r\n");
+                    Serial.printf("  -> VL53L3C (ToF sensor)\r\n");
                     break;
                 default:
-                    USBSerial.printf("  -> Unknown device\r\n");
+                    Serial.printf("  -> Unknown device\r\n");
                     break;
             }
         }
     }
     
     if (deviceCount == 0) {
-        USBSerial.printf("No I2C devices found!\r\n");
-        USBSerial.printf("Check:\r\n");
-        USBSerial.printf("- Wiring (SDA/SCL connections)\r\n");
-        USBSerial.printf("- Power supply to sensors\r\n");
-        USBSerial.printf("- Pull-up resistors (4.7kΩ recommended)\r\n");
+        Serial.printf("No I2C devices found!\r\n");
+        Serial.printf("Check:\r\n");
+        Serial.printf("- Wiring (SDA/SCL connections)\r\n");
+        Serial.printf("- Power supply to sensors\r\n");
+        Serial.printf("- Pull-up resistors (4.7kΩ recommended)\r\n");
     } else {
-        USBSerial.printf("Found %d I2C device(s)\r\n", deviceCount);
+        Serial.printf("Found %d I2C device(s)\r\n", deviceCount);
     }
 }
 
 // Debug version of sensor_init that continues even with missing sensors
 void debug_sensor_init() {
-    USBSerial.printf("=== DEBUG SENSOR INIT ===\r\n");
+    Serial.printf("=== DEBUG SENSOR INIT ===\r\n");
     
     // I2C初期化
     Wire1.begin(SDA_PIN, SCL_PIN, 400000UL);
-    USBSerial.printf("I2C initialized on SDA:%d, SCL:%d\r\n", SDA_PIN, SCL_PIN);
+    Serial.printf("I2C initialized on SDA:%d, SCL:%d\r\n", SDA_PIN, SCL_PIN);
     
     // I2Cデバイススキャン
     i2c_scanner();
     
     // センサー初期化を試行（エラーでも継続）
-    USBSerial.printf("\nTrying ToF sensor...\r\n");
+    Serial.printf("\nTrying ToF sensor...\r\n");
     try {
         tof_init();
-        USBSerial.printf("ToF: OK\r\n");
+        Serial.printf("ToF: OK\r\n");
     } catch (...) {
-        USBSerial.printf("ToF: FAILED (continuing anyway)\r\n");
+        Serial.printf("ToF: FAILED (continuing anyway)\r\n");
     }
     
-    USBSerial.printf("Trying IMU sensor...\r\n");
+    Serial.printf("Trying IMU sensor...\r\n");
     try {
         imu_init();
-        USBSerial.printf("IMU: OK\r\n");
+        Serial.printf("IMU: OK\r\n");
     } catch (...) {
-        USBSerial.printf("IMU: FAILED (continuing anyway)\r\n");
+        Serial.printf("IMU: FAILED (continuing anyway)\r\n");
     }
     
-    USBSerial.printf("Trying AHRS...\r\n");
+    Serial.printf("Trying AHRS...\r\n");
     Drone_ahrs.begin(400.0);
-    USBSerial.printf("AHRS: OK\r\n");
+    Serial.printf("AHRS: OK\r\n");
     
-    USBSerial.printf("Trying power monitor...\r\n");
+    Serial.printf("Trying power monitor...\r\n");
     try {
         ina3221.begin(&Wire1);
         ina3221.reset();
-        USBSerial.printf("INA3221: OK\r\n");
+        Serial.printf("INA3221: OK\r\n");
     } catch (...) {
-        USBSerial.printf("INA3221: FAILED (continuing anyway)\r\n");
+        Serial.printf("INA3221: FAILED (continuing anyway)\r\n");
     }
     
     // フィルター初期化
@@ -460,20 +460,20 @@ void debug_sensor_init() {
     raw_gz_filter.set_parameter(0.003, 0.0025);
     raw_az_d_filter.set_parameter(0.1, 0.0025);
     
-    USBSerial.printf("=== DEBUG INIT COMPLETE ===\r\n");
+    Serial.printf("=== DEBUG INIT COMPLETE ===\r\n");
 }
 
 // Minimal sensor init for EEG experiments (skip all I2C sensors)
 void minimal_sensor_init() {
-    USBSerial.printf("=== MINIMAL SENSOR INIT (EEG Mode) ===\r\n");
+    Serial.printf("=== MINIMAL SENSOR INIT (EEG Mode) ===\r\n");
     
     // Skip I2C initialization entirely
-    USBSerial.printf("Skipping I2C sensors for EEG experiment\r\n");
+    Serial.printf("Skipping I2C sensors for EEG experiment\r\n");
     
     // Initialize only AHRS (software-based)
-    USBSerial.printf("Initializing AHRS...\r\n");
+    Serial.printf("Initializing AHRS...\r\n");
     Drone_ahrs.begin(400.0);
-    USBSerial.printf("AHRS: OK\r\n");
+    Serial.printf("AHRS: OK\r\n");
     
     // Initialize filters with default values
     voltage_filter.set_parameter(0.005, 0.0025);
@@ -494,5 +494,5 @@ void minimal_sensor_init() {
     Altitude2 = 0.5f;
     Voltage = 3.7f; // Dummy battery voltage
     
-    USBSerial.printf("=== MINIMAL INIT COMPLETE - READY FOR EEG ===\r\n");
+    Serial.printf("=== MINIMAL INIT COMPLETE - READY FOR EEG ===\r\n");
 }
