@@ -444,6 +444,36 @@ def api_gpio_config():
         except Exception as e:
             return jsonify({'status': 'error', 'message': str(e)}), 500
 
+def monitor_eeg_file():
+    """Monitor local EEG data file instead of MQTT"""
+    import os
+    while True:
+        try:
+            if os.path.exists('/tmp/latest_eeg_data.json'):
+                with open('/tmp/latest_eeg_data.json', 'r') as f:
+                    data = json.load(f)
+                
+                # Process the data like MQTT message
+                global current_state, brainwave_data
+                current_state = {
+                    'theta_power': data.get('theta_power', 0),
+                    'alpha_power': data.get('alpha_power', 0),
+                    'beta_power': data.get('beta_power', 0),
+                    'gamma_power': data.get('gamma_power', 0),
+                    'dominant_wave': data.get('dominant_wave', 'alpha'),
+                    'timestamp': data.get('timestamp', time.time())
+                }
+                
+                brainwave_data.append(current_state.copy())
+                
+                # Emit to dashboard
+                socketio.emit('brainwave_update', current_state)
+                
+        except Exception as e:
+            pass  # Silently continue
+        
+        time.sleep(0.1)  # Check every 100ms
+
 def start_mqtt_client():
     """Start MQTT client in background"""
     try:
@@ -453,6 +483,10 @@ def start_mqtt_client():
         print(f"MQTT connection error: {e}")
 
 if __name__ == '__main__':
+    # Start file monitor
+    file_thread = threading.Thread(target=monitor_eeg_file, daemon=True)
+    file_thread.start()
+    
     # Start MQTT client in background thread
     mqtt_thread = threading.Thread(target=start_mqtt_client, daemon=True)
     mqtt_thread.start()
@@ -460,7 +494,7 @@ if __name__ == '__main__':
     print("🧠 PiEEG Brainwave Dashboard Starting (Claude Code Edition)...")
     print("📊 Dashboard available at: http://localhost:5001")
     print("🤖 AI Analysis powered by Claude Code (no API key needed!)")
-    print("📡 MQTT Topic:", MQTT_TOPIC)
+    print("📡 Data Source: File monitoring + MQTT backup")
     print("\n📁 Brainwave data will be saved to:", DATA_DIR)
     print("💡 Use 'claude dashboard/analyze_brainwaves.py' for AI analysis")
     

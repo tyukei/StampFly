@@ -355,67 +355,61 @@ udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 print(f"UDP client configured to send to {UDP_IP}:{UDP_PORT}")
 
-def send_udp_raw_data(channel_data):
+def send_brainwave_powers_udp(theta_power, alpha_power, beta_power, gamma_power):
     """
-    EEG生データ（Ch1の値）をUDPで送信
+    脳波パワー（α、β、θ、γ）の合計値をUDPで送信
     """
     try:
-        # Ch1の生データを送信（フィルタ前の値）
-        raw_value = channel_data
+        # 脳波パワーの合計値を計算
+        total_power = theta_power + alpha_power + beta_power + gamma_power
         
-        # 生データを0-10の範囲にスケール
-        # EEGデータは通常±数十～数百μVの範囲
-        scaled_value = abs(raw_value) / 100.0  # 100μVで1.0になるようにスケール
-        if scaled_value > 10.0:
-            scaled_value = 10.0
+        # 0-10の範囲にスケール（通常の脳波パワーは0.001-0.01程度）
+        scaled_power = min(total_power * 1000, 10.0)  # 1000倍してスケール
         
         # UDP送信
-        message = f"{scaled_value:.2f}"
+        message = f"{scaled_power:.2f}"
         udp_socket.sendto(message.encode(), (UDP_IP, UDP_PORT))
         
-        print(f"Sent raw EEG data: {raw_value:.2f}μV -> scaled: {scaled_value:.2f}")
+        print(f"Sent brainwave powers: Total={total_power:.6f} -> Scaled={scaled_power:.2f}")
+        print(f"  Powers - θ:{theta_power:.6f} α:{alpha_power:.6f} β:{beta_power:.6f} γ:{gamma_power:.6f}")
         
     except Exception as e:
         print(f"Failed to send UDP data: {e}")
 
-def send_brainwave_powers(theta_power, alpha_power, beta_power, gamma_power):
+def send_mqtt_command(theta_power, alpha_power, beta_power, gamma_power):
     """
-    脳波パワー解析結果も送信（オプション）
+    Dashboard用MQTT送信（元の関数を復活）
     """
+    powers = {
+        "theta": theta_power,
+        "alpha": alpha_power,
+        "beta": beta_power,
+        "gamma": gamma_power
+    }
+    
+    dominant_wave = max(powers, key=powers.get)
+    
+    command = {
+        "timestamp": time.time(),
+        "theta_power": float(theta_power),
+        "alpha_power": float(alpha_power),
+        "beta_power": float(beta_power),
+        "gamma_power": float(gamma_power),
+        "dominant_wave": dominant_wave,
+        "command": dominant_wave
+    }
+    
     try:
-        # 最も強い脳波を数値化
-        powers = {
-            "theta": theta_power,
-            "alpha": alpha_power, 
-            "beta": beta_power,
-            "gamma": gamma_power
-        }
+        # Dashboard用のローカルファイル保存
+        import json
+        with open('/tmp/latest_eeg_data.json', 'w') as f:
+            json.dump(command, f)
         
-        dominant_wave = max(powers, key=powers.get)
-        
-        # 脳波タイプに応じた数値マッピング
-        wave_values = {
-            "theta": 1.0,   # 0-1: Theta優勢
-            "alpha": 2.5,   # 2-3: Alpha優勢  
-            "beta": 4.0,    # 3-4: Beta優勢
-            "gamma": 5.5    # 5+: Gamma優勢
-        }
-        
-        value = wave_values.get(dominant_wave, 2.5)
-        
-        # 強度で微調整
-        max_power = powers[dominant_wave]
-        intensity_factor = min(max_power * 1000, 2.0)  # 最大2倍まで
-        final_value = value + intensity_factor
-        
-        message = f"{final_value:.2f}"
-        udp_socket.sendto(message.encode(), (UDP_IP, UDP_PORT))
-        
-        print(f"Sent brainwave: {dominant_wave.upper()} -> {final_value:.2f}")
-        print(f"  Powers - θ:{theta_power:.4f} α:{alpha_power:.4f} β:{beta_power:.4f} γ:{gamma_power:.4f}")
-        
+        print(f"Saved to dashboard: {dominant_wave.upper()}")
+        print(f"  Theta: {theta_power:.6f}, Alpha: {alpha_power:.6f}")
+        print(f"  Beta: {beta_power:.6f}, Gamma: {gamma_power:.6f}")
     except Exception as e:
-        print(f"Failed to send brainwave data: {e}")
+        print(f"Failed to save dashboard data: {e}")
 
 while 1:
     
@@ -687,13 +681,11 @@ while 1:
                     avg_beta_power = beta_power_1
                     avg_gamma_power = gamma_power_1
                     
-                    # EEG生データを送信（Ch1の最新値）
-                    if len(data_1ch_test) > 0:
-                        latest_raw_value = data_1ch_test[-1]  # Ch1の最新生データ
-                        send_udp_raw_data(latest_raw_value)
+                    # Dashboard用データ保存（元のMQTT機能を復活）
+                    send_mqtt_command(avg_theta_power, avg_alpha_power, avg_beta_power, avg_gamma_power)
                     
-                    # 脳波解析結果も送信（オプション）
-                    # send_brainwave_powers(avg_theta_power, avg_alpha_power, avg_beta_power, avg_gamma_power)
+                    # ESP32-S3へ脳波パワー合計値をUDP送信
+                    send_brainwave_powers_udp(avg_theta_power, avg_alpha_power, avg_beta_power, avg_gamma_power)
 
                     plt.pause(0.0000000000001)
                     
