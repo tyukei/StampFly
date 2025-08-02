@@ -70,5 +70,8 @@ void sensor_reset_offset(void);
 void sensor_calc_offset_avarage(void);
 void ahrs_reset(void);
 uint8_t  scan_i2c(void);
+void i2c_scanner(void);
+void debug_sensor_init(void);
+void minimal_sensor_init(void);
 
 #endif

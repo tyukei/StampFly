@@ -3,12 +3,15 @@
 #include <ArduinoJson.h>
 
 // WiFi認証情報
-const char* ssid = "OPPO Renon11 A";
+const char* ssid = "OPPORenon";
 const char* password = "bxyk6037";
 
 // MQTTクライアントインスタンス
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
+
+// EEGデータコールバック（外部から設定可能）
+void (*eegDataCallback)(float, unsigned long) = nullptr;
 
 // コールバック関数（受信用）
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
@@ -37,39 +40,50 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
     }
 }
 
-// EEGデータコールバック（外部から設定可能）
-void (*eegDataCallback)(float, unsigned long) = nullptr;
-
 void setEEGDataCallback(void (*callback)(float, unsigned long)) {
     eegDataCallback = callback;
 }
 
 bool initMQTT(const char* mqtt_server, int port) {
     // WiFi接続
+    USBSerial.printf("WiFi connecting to: %s\r\n", ssid);
     WiFi.begin(ssid, password);
-    Serial.print("WiFi接続中");
+    USBSerial.printf("WiFi接続中");
     
     int attempts = 0;
     while (WiFi.status() != WL_CONNECTED && attempts < 20) {
         delay(500);
-        Serial.print(".");
+        USBSerial.printf(".");
         attempts++;
     }
     
     if (WiFi.status() != WL_CONNECTED) {
-        Serial.println("\nWiFi接続失敗");
+        USBSerial.printf("\nWiFi接続失敗 - Status: %d\r\n", WiFi.status());
         return false;
     }
     
-    Serial.println("\nWiFi接続完了");
-    Serial.print("IPアドレス: ");
-    Serial.println(WiFi.localIP());
+    USBSerial.printf("\nWiFi接続完了\r\n");
+    USBSerial.printf("IPアドレス: %s\r\n", WiFi.localIP().toString().c_str());
+    USBSerial.printf("サブネットマスク: %s\r\n", WiFi.subnetMask().toString().c_str());
+    USBSerial.printf("ゲートウェイ: %s\r\n", WiFi.gatewayIP().toString().c_str());
+    USBSerial.printf("DNS: %s\r\n", WiFi.dnsIP().toString().c_str());
     
     // MQTT設定
+    USBSerial.printf("Setting MQTT server: %s:%d\r\n", mqtt_server, port);
     mqttClient.setServer(mqtt_server, port);
     mqttClient.setCallback(mqttCallback);
     
-    return true;
+    // MQTT接続テスト
+    USBSerial.printf("Testing MQTT connection...\r\n");
+    if (mqttClient.connect("StampS3_TestClient")) {
+        USBSerial.printf("MQTT connection successful!\r\n");
+        mqttClient.subscribe("pieeg/data");
+        USBSerial.printf("Subscribed to pieeg/data\r\n");
+        return true;
+    } else {
+        USBSerial.printf("MQTT connection failed, state: %d\r\n", mqttClient.state());
+        return false;
+    }
 }
 
 bool connectMQTT(const char* clientId) {

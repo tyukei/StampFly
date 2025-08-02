@@ -11,6 +11,7 @@
 #include "led.hpp"
 #include "telemetry.hpp"
 #include "pieeg_mqtt.hpp"
+#include <cmath>
 
 //モータPWM出力Pinのアサイン
 //Motor PWM Pin
@@ -214,8 +215,10 @@ void init_copter(void)
   
   //Initialize PWM
   init_pwm();
-  sensor_init();
-  USBSerial.printf("Finish sensor init!\r\n");
+  
+  // EEGモード：センサーをスキップしてWiFi/MQTTのみ初期化
+  minimal_sensor_init();
+  USBSerial.printf("Finish sensor init (EEG mode)!\r\n");
 
   //PID GAIN and etc. Init
   control_init();
@@ -223,22 +226,50 @@ void init_copter(void)
   //Initilize Radio control
   rc_init();
 
-  //Initialize MQTT
-  if (initMQTT("192.168.1.100")) {
-    USBSerial.printf("MQTT initialized\r\n");
+  //Initialize MQTT (optional for EEG mode)
+  USBSerial.printf("Attempting MQTT connection to 192.168.72.60:1883\r\n");
+  if (initMQTT("192.168.72.60")) {
+    USBSerial.printf("MQTT initialized successfully\r\n");
     // EEGデータ受信時のコールバック設定
     setEEGDataCallback([](float eegValue, unsigned long timestamp) {
-      // EEG値に基づいて飛行モードを調整
-      if (eegValue > 2.5f) {
-        // 高集中度：高度を上げる
-        Throttle_command += 5.0f;
-      } else if (eegValue < 1.0f) {
-        // 低集中度：高度を下げる
-        Throttle_command -= 5.0f;
-      }
+      // EEG値に基づいてLED色を変更（基礎実験）
+      update_eeg_led(eegValue);
+      
+      // シリアル出力でEEG値をモニタリング
+      USBSerial.printf("EEG: %.2f, LED Color: 0x%06X\r\n", eegValue, get_eeg_color(eegValue));
     });
   } else {
-    USBSerial.printf("MQTT init failed\r\n");
+    USBSerial.printf("MQTT init failed - continuing in EEG Simulation Mode\r\n");
+    USBSerial.printf("Starting autonomous EEG LED simulation...\r\n");
+    
+    // 初期LED表示テスト
+    USBSerial.printf("Initial LED color test:\r\n");
+    
+    // 青色テスト
+    update_eeg_led(0.3f);
+    USBSerial.printf("LED -> Blue (EEG: 0.3)\r\n");
+    delay(1000);
+    
+    // 緑色テスト  
+    update_eeg_led(1.0f);
+    USBSerial.printf("LED -> Green (EEG: 1.0)\r\n");
+    delay(1000);
+    
+    // 赤色テスト
+    update_eeg_led(2.0f);
+    USBSerial.printf("LED -> Red (EEG: 2.0)\r\n");
+    delay(1000);
+    
+    // マゼンタテスト
+    update_eeg_led(3.0f);
+    USBSerial.printf("LED -> Magenta (EEG: 3.0)\r\n");
+    delay(1000);
+    
+    // 白色テスト
+    update_eeg_led(4.5f);
+    USBSerial.printf("LED -> White (EEG: 4.5)\r\n");
+    
+    USBSerial.printf("Initial test complete! Starting continuous simulation...\r\n");
   }
 
   //割り込み設定
@@ -266,15 +297,72 @@ void loop_400Hz(void)
   Interval_time = Elapsed_time - Old_Elapsed_time;
   Timevalue+=0.0025f;
   
-  //Read Sensor Value
-  sense_time = sensor_read();
+  //Read Sensor Value (skip in EEG mode)
   uint32_t cs_time = micros();
+  // sense_time = sensor_read(); // Disabled for EEG mode - no sensors connected
+  sense_time = 0.001f; // Dummy sensor read time
 
   //LED Drive
   led_drive();
   
-  //MQTT処理
-  mqttLoop();
+  // Simple debug output every 2 seconds
+  static uint32_t debug_counter = 0;
+  debug_counter++;
+  if (debug_counter % 800 == 0) { // Every 2 seconds
+    USBSerial.printf("Loop running - Time: %.1fs\r\n", Timevalue);
+  }
+  
+  //MQTT処理 (safe call)
+  try {
+    mqttLoop();
+  } catch (...) {
+    // MQTT error - continue anyway
+  }
+  
+  // EEGシミュレーション（MQTTが使用できない場合）
+  static uint32_t eeg_sim_counter = 0;
+  static bool mqtt_failed = false;
+  static bool first_mqtt_check = true;
+  
+  // MQTT接続状態を一度だけチェック
+  if (first_mqtt_check) {
+    // MQTTクライアントが接続されていない場合はシミュレーション開始
+    if (!mqttClient.connected()) {
+      mqtt_failed = true;
+      USBSerial.printf("MQTT not connected - starting EEG simulation mode\r\n");
+    }
+    first_mqtt_check = false;
+  }
+  
+  // MQTTが失敗している場合のみシミュレーション実行
+  if (mqtt_failed) {
+    eeg_sim_counter++;
+    
+    // 3秒毎にEEG値を変更（1200 = 3秒 * 400Hz）
+    if (eeg_sim_counter % 1200 == 0) {
+      float sim_time = Timevalue;
+      float eeg_value;
+      
+      // 周期的にEEG値を変化させる（集中度をシミュレート）
+      float cycle = fmod(sim_time / 10.0f, 1.0f); // 10秒サイクル
+      
+      if (cycle < 0.2f) {
+        eeg_value = 0.3f; // 低集中（青）
+      } else if (cycle < 0.4f) {
+        eeg_value = 1.0f; // 中集中（緑）
+      } else if (cycle < 0.6f) {
+        eeg_value = 2.0f; // 高集中（赤）
+      } else if (cycle < 0.8f) {
+        eeg_value = 3.0f; // 超高集中（マゼンタ）
+      } else {
+        eeg_value = 4.5f; // 最高集中（白）
+      }
+      
+      // LED更新
+      update_eeg_led(eeg_value);
+      USBSerial.printf("EEG Simulation: %.1f -> Color: 0x%06X\r\n", eeg_value, get_eeg_color(eeg_value));
+    }
+  }
   
   //Begin Mode select
   if (Mode == INIT_MODE)

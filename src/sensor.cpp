@@ -360,3 +360,139 @@ float x = r13*range;
 float y = r23*range;
 float z = r33*range;
 #endif
+
+// I2C device scanner for debugging
+void i2c_scanner(void) {
+    USBSerial.printf("Scanning I2C devices...\r\n");
+    USBSerial.printf("SDA: GPIO%d, SCL: GPIO%d\r\n", SDA_PIN, SCL_PIN);
+    
+    int deviceCount = 0;
+    for (byte address = 1; address < 127; address++) {
+        Wire1.beginTransmission(address);
+        if (Wire1.endTransmission() == 0) {
+            USBSerial.printf("I2C device found at 0x%02X\r\n", address);
+            deviceCount++;
+            
+            // 既知のデバイスを表示
+            switch (address) {
+                case 0x68:
+                    USBSerial.printf("  -> BMI270 (IMU)\r\n");
+                    break;
+                case 0x76:
+                    USBSerial.printf("  -> BMP280 (Barometer)\r\n");
+                    break;
+                case 0x10:
+                    USBSerial.printf("  -> BMM150 (Magnetometer)\r\n");
+                    break;
+                case 0x40:
+                    USBSerial.printf("  -> INA3221 (Power monitor)\r\n");
+                    break;
+                case 0x29:
+                    USBSerial.printf("  -> VL53L3C (ToF sensor)\r\n");
+                    break;
+                default:
+                    USBSerial.printf("  -> Unknown device\r\n");
+                    break;
+            }
+        }
+    }
+    
+    if (deviceCount == 0) {
+        USBSerial.printf("No I2C devices found!\r\n");
+        USBSerial.printf("Check:\r\n");
+        USBSerial.printf("- Wiring (SDA/SCL connections)\r\n");
+        USBSerial.printf("- Power supply to sensors\r\n");
+        USBSerial.printf("- Pull-up resistors (4.7kΩ recommended)\r\n");
+    } else {
+        USBSerial.printf("Found %d I2C device(s)\r\n", deviceCount);
+    }
+}
+
+// Debug version of sensor_init that continues even with missing sensors
+void debug_sensor_init() {
+    USBSerial.printf("=== DEBUG SENSOR INIT ===\r\n");
+    
+    // I2C初期化
+    Wire1.begin(SDA_PIN, SCL_PIN, 400000UL);
+    USBSerial.printf("I2C initialized on SDA:%d, SCL:%d\r\n", SDA_PIN, SCL_PIN);
+    
+    // I2Cデバイススキャン
+    i2c_scanner();
+    
+    // センサー初期化を試行（エラーでも継続）
+    USBSerial.printf("\nTrying ToF sensor...\r\n");
+    try {
+        tof_init();
+        USBSerial.printf("ToF: OK\r\n");
+    } catch (...) {
+        USBSerial.printf("ToF: FAILED (continuing anyway)\r\n");
+    }
+    
+    USBSerial.printf("Trying IMU sensor...\r\n");
+    try {
+        imu_init();
+        USBSerial.printf("IMU: OK\r\n");
+    } catch (...) {
+        USBSerial.printf("IMU: FAILED (continuing anyway)\r\n");
+    }
+    
+    USBSerial.printf("Trying AHRS...\r\n");
+    Drone_ahrs.begin(400.0);
+    USBSerial.printf("AHRS: OK\r\n");
+    
+    USBSerial.printf("Trying power monitor...\r\n");
+    try {
+        ina3221.begin(&Wire1);
+        ina3221.reset();
+        USBSerial.printf("INA3221: OK\r\n");
+    } catch (...) {
+        USBSerial.printf("INA3221: FAILED (continuing anyway)\r\n");
+    }
+    
+    // フィルター初期化
+    voltage_filter.set_parameter(0.005, 0.0025);
+    acc_filter.set_parameter(0.005, 0.0025);
+    raw_ax_filter.set_parameter(0.003, 0.0025);
+    raw_ay_filter.set_parameter(0.003, 0.0025);
+    raw_az_filter.set_parameter(0.003, 0.0025);
+    raw_gx_filter.set_parameter(0.003, 0.0025);
+    raw_gy_filter.set_parameter(0.003, 0.0025);
+    raw_gz_filter.set_parameter(0.003, 0.0025);
+    raw_az_d_filter.set_parameter(0.1, 0.0025);
+    
+    USBSerial.printf("=== DEBUG INIT COMPLETE ===\r\n");
+}
+
+// Minimal sensor init for EEG experiments (skip all I2C sensors)
+void minimal_sensor_init() {
+    USBSerial.printf("=== MINIMAL SENSOR INIT (EEG Mode) ===\r\n");
+    
+    // Skip I2C initialization entirely
+    USBSerial.printf("Skipping I2C sensors for EEG experiment\r\n");
+    
+    // Initialize only AHRS (software-based)
+    USBSerial.printf("Initializing AHRS...\r\n");
+    Drone_ahrs.begin(400.0);
+    USBSerial.printf("AHRS: OK\r\n");
+    
+    // Initialize filters with default values
+    voltage_filter.set_parameter(0.005, 0.0025);
+    acc_filter.set_parameter(0.005, 0.0025);
+    raw_ax_filter.set_parameter(0.003, 0.0025);
+    raw_ay_filter.set_parameter(0.003, 0.0025);
+    raw_az_filter.set_parameter(0.003, 0.0025);
+    raw_gx_filter.set_parameter(0.003, 0.0025);
+    raw_gy_filter.set_parameter(0.003, 0.0025);
+    raw_gz_filter.set_parameter(0.003, 0.0025);
+    raw_az_d_filter.set_parameter(0.1, 0.0025);
+    
+    // Set dummy sensor values for EEG mode
+    Roll_angle = 0.0f;
+    Pitch_angle = 0.0f;
+    Yaw_angle = 0.0f;
+    Altitude = 0.5f;
+    Altitude2 = 0.5f;
+    Voltage = 3.7f; // Dummy battery voltage
+    
+    USBSerial.printf("=== MINIMAL INIT COMPLETE - READY FOR EEG ===\r\n");
+}
