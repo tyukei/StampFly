@@ -33,6 +33,7 @@ class BrainwaveDashboardHandler(http.server.SimpleHTTPRequestHandler):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🧠 PiEEG Brainwave Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { 
             font-family: 'Arial', sans-serif; 
@@ -129,14 +130,15 @@ class BrainwaveDashboardHandler(http.server.SimpleHTTPRequestHandler):
             border-left: 3px solid #00d4ff;
         }
         .chart-container {
-            height: 300px;
+            height: 400px;
             background: rgba(0, 20, 40, 0.3);
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #888;
-            font-size: 18px;
+            padding: 20px;
+            position: relative;
+        }
+        .chart-canvas {
+            width: 100% !important;
+            height: 100% !important;
         }
         .refresh-button {
             background: linear-gradient(45deg, #00d4ff, #0099cc);
@@ -232,10 +234,9 @@ class BrainwaveDashboardHandler(http.server.SimpleHTTPRequestHandler):
         </div>
         
         <div class="panel full-width">
-            <h2>📈 リアルタイム波形 (予定)</h2>
+            <h2>📈 リアルタイム脳波波形</h2>
             <div class="chart-container">
-                💡 リアルタイム脳波チャートを実装予定
-                <br>現在は上記の数値データで確認してください
+                <canvas id="brainwave-chart" class="chart-canvas"></canvas>
             </div>
         </div>
     </div>
@@ -243,6 +244,15 @@ class BrainwaveDashboardHandler(http.server.SimpleHTTPRequestHandler):
     <script>
         let dataCount = 0;
         let lastUpdateTime = 0;
+        let brainwaveChart;
+        let chartData = {
+            theta: [],
+            alpha: [],
+            beta: [],
+            gamma: []
+        };
+        let timeLabels = [];
+        const maxDataPoints = 50; // 表示する最大データポイント数
         
         const waveDescriptions = {
             'theta': '深いリラックス・瞑想状態',
@@ -250,6 +260,92 @@ class BrainwaveDashboardHandler(http.server.SimpleHTTPRequestHandler):
             'beta': '通常の覚醒・思考状態',
             'gamma': '高度な集中・認知状態'
         };
+        
+        // Chart.js初期化
+        function initChart() {
+            const ctx = document.getElementById('brainwave-chart').getContext('2d');
+            brainwaveChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timeLabels,
+                    datasets: [
+                        {
+                            label: 'θ Theta',
+                            data: chartData.theta,
+                            borderColor: '#ff6b6b',
+                            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'α Alpha',
+                            data: chartData.alpha,
+                            borderColor: '#4ecdc4',
+                            backgroundColor: 'rgba(78, 205, 196, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'β Beta',
+                            data: chartData.beta,
+                            borderColor: '#45b7d1',
+                            backgroundColor: 'rgba(69, 183, 209, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'γ Gamma',
+                            data: chartData.gamma,
+                            borderColor: '#f9ca24',
+                            backgroundColor: 'rgba(249, 202, 36, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff',
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#ffffff',
+                                maxTicksLimit: 10
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#ffffff'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    animation: {
+                        duration: 300
+                    }
+                }
+            });
+        }
         
         function updateBrainwaveDisplay(data) {
             if (!data) return;
@@ -271,6 +367,9 @@ class BrainwaveDashboardHandler(http.server.SimpleHTTPRequestHandler):
                 document.getElementById(wave + '-bar').style.width = percentage + '%';
                 document.getElementById(wave + '-value').textContent = value.toFixed(6);
             });
+            
+            // チャートデータを更新
+            updateChart(data);
             
             // 優勢な脳波を表示
             const dominantWave = data.dominant_wave || 'unknown';
@@ -295,6 +394,33 @@ class BrainwaveDashboardHandler(http.server.SimpleHTTPRequestHandler):
             statusElement.className = 'connection-status connected';
             
             lastUpdateTime = Date.now();
+        }
+        
+        function updateChart(data) {
+            if (!brainwaveChart) return;
+            
+            // 時間ラベルを追加
+            const now = new Date();
+            const timeLabel = now.toLocaleTimeString();
+            
+            // データポイントを追加
+            const waves = ['theta', 'alpha', 'beta', 'gamma'];
+            waves.forEach(wave => {
+                const value = data[wave + '_power'] || 0;
+                chartData[wave].push(value);
+            });
+            timeLabels.push(timeLabel);
+            
+            // 最大データポイント数を超えた場合、古いデータを削除
+            if (timeLabels.length > maxDataPoints) {
+                timeLabels.shift();
+                waves.forEach(wave => {
+                    chartData[wave].shift();
+                });
+            }
+            
+            // チャートを更新
+            brainwaveChart.update('none'); // アニメーションなしで高速更新
         }
         
         async function fetchBrainwaveData() {
@@ -324,11 +450,14 @@ class BrainwaveDashboardHandler(http.server.SimpleHTTPRequestHandler):
             fetchBrainwaveData();
         }
         
+        // ページ読み込み時の初期化
+        window.addEventListener('load', function() {
+            initChart();
+            fetchBrainwaveData();
+        });
+        
         // 定期的にデータを更新（500ms間隔）
         setInterval(fetchBrainwaveData, 500);
-        
-        // 初回データ取得
-        fetchBrainwaveData();
     </script>
 </body>
 </html>
