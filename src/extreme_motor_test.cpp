@@ -32,7 +32,7 @@ bool eeg_active = false;
 
 void setMotorESC(int channel, float throttle) {
     if (throttle < 0.05f) throttle = 0.05f;
-    if (throttle > 0.8f) throttle = 0.8f;  // 最大80%まで許可
+    if (throttle > 1.0f) throttle = 1.0f;  // 最大100%まで許可
     
     uint32_t pulse_min = (uint32_t)(4096 * 0.05);
     uint32_t pulse_max = (uint32_t)(4096 * 0.10);
@@ -53,48 +53,48 @@ void controlMotorsWithEEG(float eegValue) {
     
     if (eegValue < 1.0f) {
         // 強い左回転: FL/RL=最大, FR/RR=最小
-        thrust[0] = 0.70f; // FL 最大
-        thrust[1] = 0.10f; // FR 最小  
-        thrust[2] = 0.70f; // RL 最大
-        thrust[3] = 0.10f; // RR 最小
+        thrust[0] = 1.00f; // FL 100%!
+        thrust[1] = 0.05f; // FR 5%  
+        thrust[2] = 1.00f; // RL 100%!
+        thrust[3] = 0.05f; // RR 5%
         setLED(255, 0, 255); // マゼンタ
-        Serial.println(">>> 強い左回転: FL/RL=70%, FR/RR=10%");
+        Serial.println(">>> 強い左回転: FL/RL=100%, FR/RR=5% (20倍差!)");
     }
     else if (eegValue < 2.0f) {
         // 左回転: FL/RL=高, FR/RR=低
-        thrust[0] = 0.60f; // FL
-        thrust[1] = 0.20f; // FR
-        thrust[2] = 0.60f; // RL  
-        thrust[3] = 0.20f; // RR
+        thrust[0] = 0.80f; // FL 80%
+        thrust[1] = 0.20f; // FR 20%
+        thrust[2] = 0.80f; // RL 80%
+        thrust[3] = 0.20f; // RR 20%
         setLED(0, 0, 255); // 青
-        Serial.println(">>> 左回転: FL/RL=60%, FR/RR=20%");
+        Serial.println(">>> 左回転: FL/RL=80%, FR/RR=20% (4倍差)");
     }
     else if (eegValue < 3.0f) {
-        // 直進: 全て中間
-        thrust[0] = 0.40f; // FL
-        thrust[1] = 0.40f; // FR
-        thrust[2] = 0.40f; // RL
-        thrust[3] = 0.40f; // RR
+        // 直進: 全て高推力で浮上
+        thrust[0] = 0.70f; // FL 70%
+        thrust[1] = 0.70f; // FR 70%
+        thrust[2] = 0.70f; // RL 70%
+        thrust[3] = 0.70f; // RR 70%
         setLED(0, 255, 0); // 緑
-        Serial.println(">>> 直進: 全モーター40%");
+        Serial.println(">>> 直進浮上: 全モーター70%");
     }
     else if (eegValue < 4.0f) {
         // 右回転: FL/RL=低, FR/RR=高
-        thrust[0] = 0.20f; // FL
-        thrust[1] = 0.60f; // FR
-        thrust[2] = 0.20f; // RL
-        thrust[3] = 0.60f; // RR
+        thrust[0] = 0.20f; // FL 20%
+        thrust[1] = 0.80f; // FR 80%
+        thrust[2] = 0.20f; // RL 20%
+        thrust[3] = 0.80f; // RR 80%
         setLED(255, 255, 0); // 黄
-        Serial.println(">>> 右回転: FL/RL=20%, FR/RR=60%");
+        Serial.println(">>> 右回転: FL/RL=20%, FR/RR=80% (4倍差)");
     }
     else {
         // 強い右回転: FL/RL=最小, FR/RR=最大
-        thrust[0] = 0.10f; // FL 最小
-        thrust[1] = 0.70f; // FR 最大
-        thrust[2] = 0.10f; // RL 最小  
-        thrust[3] = 0.70f; // RR 最大
+        thrust[0] = 0.05f; // FL 5%
+        thrust[1] = 1.00f; // FR 100%!
+        thrust[2] = 0.05f; // RL 5%
+        thrust[3] = 1.00f; // RR 100%!
         setLED(255, 0, 0); // 赤
-        Serial.println(">>> 強い右回転: FL/RL=10%, FR/RR=70%");
+        Serial.println(">>> 強い右回転: FL/RL=5%, FR/RR=100% (20倍差!)");
     }
     
     // モーター制御実行
@@ -114,7 +114,7 @@ void setup() {
     
     Serial.println("=========================================");
     Serial.println("EXTREME MOTOR DIFFERENCE TEST");
-    Serial.println("極端な推力差テスト（最大7倍差）");
+    Serial.println("極端な推力差テスト（最大20倍差・100%推力）");
     Serial.println("=========================================");
     
     // LED初期化
@@ -151,15 +151,15 @@ void setup() {
     }
     
     Serial.println("\n=== 極端推力差テスト準備完了 ===");
-    Serial.println("EEG値 0-1: FL/RL=70%, FR/RR=10% (7倍差!)");
-    Serial.println("EEG値 1-2: FL/RL=60%, FR/RR=20% (3倍差)");  
-    Serial.println("EEG値 2-3: 全モーター40% (同じ)");
-    Serial.println("EEG値 3-4: FL/RL=20%, FR/RR=60% (3倍差)");
-    Serial.println("EEG値 4+:  FL/RL=10%, FR/RR=70% (7倍差!)");
+    Serial.println("EEG値 0-1: FL/RL=100%, FR/RR=5% (20倍差!)");
+    Serial.println("EEG値 1-2: FL/RL=80%, FR/RR=20% (4倍差)");  
+    Serial.println("EEG値 2-3: 全モーター70% (直進浮上)");
+    Serial.println("EEG値 3-4: FL/RL=20%, FR/RR=80% (4倍差)");
+    Serial.println("EEG値 4+:  FL/RL=5%, FR/RR=100% (20倍差!)");
     Serial.println("=====================================");
     
     // 警告表示
-    Serial.println("\n*** 警告: 最大推力70%使用 ***");
+    Serial.println("\n*** 警告: 最大推力100%使用 ***");
     Serial.println("プロペラが外れていることを確認してください！");
     
     // 起動表示
