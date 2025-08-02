@@ -1,10 +1,18 @@
+# Environment variables
+.env
+
+# Build outputs
 .pio
 build/
+
+# IDE files
 .vscode/.browse.c_cpp.db*
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
 .vscode
+
+# macOS
 .DS_Store
 src/.DS_Store
 lib/.DS_Store

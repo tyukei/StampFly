@@ -2,9 +2,16 @@
 #include <WiFi.h>
 #include <ArduinoJson.h>
 
-// WiFi認証情報
-const char* ssid = "OPPORenon";
-const char* password = "bxyk6037";
+// WiFi認証情報（.envから読み込み）
+#ifndef WIFI_SSID
+#define WIFI_SSID "default_ssid"
+#endif
+#ifndef WIFI_PASSWORD  
+#define WIFI_PASSWORD "default_password"
+#endif
+
+const char* ssid = WIFI_SSID;
+const char* password = WIFI_PASSWORD;
 
 // MQTTクライアントインスタンス
 WiFiClient espClient;

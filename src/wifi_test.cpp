@@ -1,8 +1,15 @@
 #include <WiFi.h>
 
-// WiFi設定
-const char* ssid = "OPPORenon";
-const char* password = "bxyk6037";
+// WiFi設定（.envから読み込み）
+#ifndef WIFI_SSID
+#define WIFI_SSID "default_ssid"
+#endif
+#ifndef WIFI_PASSWORD  
+#define WIFI_PASSWORD "default_password"
+#endif
+
+const char* ssid = WIFI_SSID;
+const char* password = WIFI_PASSWORD;
 
 void setup() {
   Serial.begin(115200);
