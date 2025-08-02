@@ -447,32 +447,48 @@ def api_gpio_config():
 def monitor_eeg_file():
     """Monitor local EEG data file instead of MQTT"""
     import os
+    last_modified = 0
+    data_count = 0
+    
+    print("🔍 Starting EEG file monitor...")
+    
     while True:
         try:
             if os.path.exists('/tmp/latest_eeg_data.json'):
-                with open('/tmp/latest_eeg_data.json', 'r') as f:
-                    data = json.load(f)
+                # ファイルの更新時刻をチェック
+                current_modified = os.path.getmtime('/tmp/latest_eeg_data.json')
                 
-                # Process the data like MQTT message
-                global current_state, brainwave_data
-                current_state = {
-                    'theta_power': data.get('theta_power', 0),
-                    'alpha_power': data.get('alpha_power', 0),
-                    'beta_power': data.get('beta_power', 0),
-                    'gamma_power': data.get('gamma_power', 0),
-                    'dominant_wave': data.get('dominant_wave', 'alpha'),
-                    'timestamp': data.get('timestamp', time.time())
-                }
-                
-                brainwave_data.append(current_state.copy())
-                
-                # Emit to dashboard
-                socketio.emit('brainwave_update', current_state)
-                
+                if current_modified > last_modified:
+                    last_modified = current_modified
+                    
+                    with open('/tmp/latest_eeg_data.json', 'r') as f:
+                        data = json.load(f)
+                    
+                    # Process the data like MQTT message
+                    global current_state, brainwave_data
+                    current_state = {
+                        'theta_power': data.get('theta_power', 0),
+                        'alpha_power': data.get('alpha_power', 0),
+                        'beta_power': data.get('beta_power', 0),
+                        'gamma_power': data.get('gamma_power', 0),
+                        'dominant_wave': data.get('dominant_wave', 'alpha'),
+                        'timestamp': data.get('timestamp', time.time())
+                    }
+                    
+                    brainwave_data.append(current_state.copy())
+                    
+                    # Emit to dashboard
+                    socketio.emit('brainwave_update', current_state)
+                    
+                    data_count += 1
+                    if data_count % 10 == 0:  # 10回に1回ログ出力
+                        print(f"📊 Dashboard updated #{data_count}: {current_state['dominant_wave'].upper()} "
+                              f"(θ:{current_state['theta_power']:.4f} α:{current_state['alpha_power']:.4f})")
+                        
         except Exception as e:
-            pass  # Silently continue
+            print(f"⚠️  File monitor error: {e}")
         
-        time.sleep(0.1)  # Check every 100ms
+        time.sleep(0.05)  # Check every 50ms for better responsiveness
 
 def start_mqtt_client():
     """Start MQTT client in background"""

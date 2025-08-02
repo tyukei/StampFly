@@ -357,28 +357,51 @@ print(f"UDP client configured to send to {UDP_IP}:{UDP_PORT}")
 
 def send_brainwave_powers_udp(theta_power, alpha_power, beta_power, gamma_power):
     """
-    脳波パワー（α、β、θ、γ）の合計値をUDPで送信
+    脳波パワー（α、β、θ、γ）の比率をUDPで送信
     """
     try:
         # 脳波パワーの合計値を計算
         total_power = theta_power + alpha_power + beta_power + gamma_power
         
-        # 0-10の範囲にスケール（通常の脳波パワーは0.001-0.01程度）
-        scaled_power = min(total_power * 1000, 10.0)  # 1000倍してスケール
+        # ゼロ除算を防ぐ
+        if total_power == 0:
+            scaled_power = 2.5  # デフォルト値（中央）
+        else:
+            # 各脳波の比率を計算
+            theta_ratio = theta_power / total_power
+            alpha_ratio = alpha_power / total_power
+            beta_ratio = beta_power / total_power
+            gamma_ratio = gamma_power / total_power
+            
+            # 最も強い脳波に基づいて0-10の値にマッピング
+            if theta_ratio > 0.4:  # Theta優勢
+                scaled_power = 0.5 + theta_ratio * 1.5  # 0.5-2.0の範囲
+            elif alpha_ratio > 0.4:  # Alpha優勢
+                scaled_power = 2.0 + alpha_ratio * 2.0  # 2.0-4.0の範囲
+            elif beta_ratio > 0.4:  # Beta優勢
+                scaled_power = 4.0 + beta_ratio * 2.0  # 4.0-6.0の範囲
+            elif gamma_ratio > 0.4:  # Gamma優勢
+                scaled_power = 6.0 + gamma_ratio * 3.0  # 6.0-9.0の範囲
+            else:
+                # 混在状態
+                scaled_power = 2.5 + (beta_ratio + gamma_ratio) * 2.5  # 集中度に応じて2.5-5.0
+        
+        # 範囲を0-10に制限
+        scaled_power = max(0.0, min(scaled_power, 10.0))
         
         # UDP送信
         message = f"{scaled_power:.2f}"
         udp_socket.sendto(message.encode(), (UDP_IP, UDP_PORT))
         
-        print(f"Sent brainwave powers: Total={total_power:.6f} -> Scaled={scaled_power:.2f}")
-        print(f"  Powers - θ:{theta_power:.6f} α:{alpha_power:.6f} β:{beta_power:.6f} γ:{gamma_power:.6f}")
+        print(f"Sent brainwave data: Total={total_power:.6f} -> Scaled={scaled_power:.2f}")
+        print(f"  Ratios - θ:{theta_ratio:.3f} α:{alpha_ratio:.3f} β:{beta_ratio:.3f} γ:{gamma_ratio:.3f}")
         
     except Exception as e:
         print(f"Failed to send UDP data: {e}")
 
 def send_mqtt_command(theta_power, alpha_power, beta_power, gamma_power):
     """
-    Dashboard用MQTT送信（元の関数を復活）
+    Dashboard用データ保存（ファイル競合対策版）
     """
     powers = {
         "theta": theta_power,
@@ -400,16 +423,24 @@ def send_mqtt_command(theta_power, alpha_power, beta_power, gamma_power):
     }
     
     try:
-        # Dashboard用のローカルファイル保存
+        # Dashboard用のローカルファイル保存（一時ファイル経由で安全に）
         import json
-        with open('/tmp/latest_eeg_data.json', 'w') as f:
-            json.dump(command, f)
+        import tempfile
+        import os
         
-        print(f"Saved to dashboard: {dominant_wave.upper()}")
-        print(f"  Theta: {theta_power:.6f}, Alpha: {alpha_power:.6f}")
-        print(f"  Beta: {beta_power:.6f}, Gamma: {gamma_power:.6f}")
+        # 一時ファイルに書き込んでから移動（atomic operation）
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as tmp_file:
+            json.dump(command, tmp_file, indent=2)
+            tmp_path = tmp_file.name
+        
+        # 元のファイルに移動
+        os.rename(tmp_path, '/tmp/latest_eeg_data.json')
+        
+        print(f"✓ Dashboard updated: {dominant_wave.upper()}")
+        print(f"  θ:{theta_power:.6f} α:{alpha_power:.6f} β:{beta_power:.6f} γ:{gamma_power:.6f}")
+        
     except Exception as e:
-        print(f"Failed to save dashboard data: {e}")
+        print(f"✗ Dashboard update failed: {e}")
 
 while 1:
     
