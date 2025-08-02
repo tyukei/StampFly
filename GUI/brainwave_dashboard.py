@@ -512,19 +512,35 @@ class BrainwaveDashboard:
         def handler(*args, **kwargs):
             return BrainwaveDashboardHandler(*args, dashboard_instance=self, **kwargs)
         
-        with socketserver.TCPServer(("", self.port), handler) as httpd:
-            print("🧠 PiEEG Brainwave Dashboard")
-            print("=" * 50)
-            print(f"🌐 Web UI: http://localhost:{self.port}")
-            print(f"📁 Data File: /tmp/latest_eeg_data.json")
-            print("📊 Real-time brainwave visualization")
-            print("=" * 50)
-            print("Ctrl+C to stop")
-            
+        # ポートが使用中の場合、自動的に次のポートを試す
+        port_tried = self.port
+        while port_tried < self.port + 10:  # 最大10ポート試行
             try:
-                httpd.serve_forever()
-            except KeyboardInterrupt:
-                print("\n\n👋 Brainwave dashboard stopped. Goodbye!")
+                with socketserver.TCPServer(("", port_tried), handler) as httpd:
+                    print("🧠 PiEEG Brainwave Dashboard")
+                    print("=" * 50)
+                    print(f"🌐 Web UI: http://localhost:{port_tried}")
+                    print(f"📁 Data File: /tmp/latest_eeg_data.json")
+                    print("📊 Real-time brainwave visualization")
+                    print("=" * 50)
+                    print("Ctrl+C to stop")
+                    
+                    try:
+                        httpd.serve_forever()
+                    except KeyboardInterrupt:
+                        print("\n\n👋 Brainwave dashboard stopped. Goodbye!")
+                    return
+                    
+            except OSError as e:
+                if "Address already in use" in str(e):
+                    print(f"⚠️  Port {port_tried} is busy, trying {port_tried + 1}...")
+                    port_tried += 1
+                    continue
+                else:
+                    raise
+        
+        print(f"❌ Could not find available port in range {self.port}-{self.port + 9}")
+        print("💡 Try: python3 GUI/brainwave_dashboard.py 9000")
 
 if __name__ == "__main__":
     import sys
