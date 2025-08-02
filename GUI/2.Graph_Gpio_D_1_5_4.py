@@ -8,8 +8,7 @@ from scipy.ndimage import gaussian_filter1d
 from scipy import signal as scipy_signal
 import gpiod
 import numpy as np
-import paho.mqtt.client as mqtt
-import json
+import socket
 import signal
 import sys
 import atexit
@@ -56,7 +55,7 @@ except OSError as e:
 # GPIO cleanup function
 def cleanup_gpio():
     """Clean up GPIO resources"""
-    global cs_line, line_1, spi, spi_2, mqtt_client
+    global cs_line, line_1, spi, spi_2, udp_socket
     try:
         print("Cleaning up GPIO resources...")
         if 'cs_line' in globals():
@@ -67,8 +66,8 @@ def cleanup_gpio():
             spi.close()
         if 'spi_2' in globals():
             spi_2.close()
-        if 'mqtt_client' in globals():
-            mqtt_client.disconnect()
+        if 'udp_socket' in globals():
+            udp_socket.close()
         print("GPIO cleanup completed")
     except Exception as e:
         print(f"Error during GPIO cleanup: {e}")
@@ -347,54 +346,76 @@ def detect_all_brainwaves(data, fs):
     
     return theta_power, alpha_power, beta_power, gamma_power
 
-mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
-mqtt_broker = "broker.hivemq.com"
-mqtt_port = 1883
-mqtt_topic = "pieeg/m5stamp/commands"
+import socket
 
-def on_connect(client, userdata, flags, rc):
-    print(f"Connected to MQTT broker with result code {rc}")
+# UDP設定（ESP32-S3に直接送信）
+UDP_IP = "172.21.128.229"  # ESP32-S3のIPアドレス（環境に応じて変更）
+UDP_PORT = 4210
+udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-def on_publish(client, userdata, mid):
-    print(f"Message published with mid: {mid}")
+print(f"UDP client configured to send to {UDP_IP}:{UDP_PORT}")
 
-mqtt_client.on_connect = on_connect
-mqtt_client.on_publish = on_publish
-
-try:
-    mqtt_client.connect(mqtt_broker, mqtt_port, 60)
-    mqtt_client.loop_start()
-    print("MQTT client connected")
-except Exception as e:
-    print(f"Failed to connect to MQTT broker: {e}")
-
-def send_mqtt_command(theta_power, alpha_power, beta_power, gamma_power):
-    powers = {
-        "theta": theta_power,
-        "alpha": alpha_power,
-        "beta": beta_power,
-        "gamma": gamma_power
-    }
-    
-    dominant_wave = max(powers, key=powers.get)
-    
-    command = {
-        "timestamp": time.time(),
-        "theta_power": float(theta_power),
-        "alpha_power": float(alpha_power),
-        "beta_power": float(beta_power),
-        "gamma_power": float(gamma_power),
-        "dominant_wave": dominant_wave,
-        "command": dominant_wave
-    }
-    
+def send_udp_raw_data(channel_data):
+    """
+    EEG生データ（Ch1の値）をUDPで送信
+    """
     try:
-        mqtt_client.publish(mqtt_topic, json.dumps(command))
-        print(f"Sent command: {dominant_wave.upper()}")
-        print(f"  Theta: {theta_power:.4f}, Alpha: {alpha_power:.4f}")
-        print(f"  Beta: {beta_power:.4f}, Gamma: {gamma_power:.4f}")
+        # Ch1の生データを送信（フィルタ前の値）
+        raw_value = channel_data
+        
+        # 生データを0-10の範囲にスケール
+        # EEGデータは通常±数十～数百μVの範囲
+        scaled_value = abs(raw_value) / 100.0  # 100μVで1.0になるようにスケール
+        if scaled_value > 10.0:
+            scaled_value = 10.0
+        
+        # UDP送信
+        message = f"{scaled_value:.2f}"
+        udp_socket.sendto(message.encode(), (UDP_IP, UDP_PORT))
+        
+        print(f"Sent raw EEG data: {raw_value:.2f}μV -> scaled: {scaled_value:.2f}")
+        
     except Exception as e:
-        print(f"Failed to send MQTT command: {e}")
+        print(f"Failed to send UDP data: {e}")
+
+def send_brainwave_powers(theta_power, alpha_power, beta_power, gamma_power):
+    """
+    脳波パワー解析結果も送信（オプション）
+    """
+    try:
+        # 最も強い脳波を数値化
+        powers = {
+            "theta": theta_power,
+            "alpha": alpha_power, 
+            "beta": beta_power,
+            "gamma": gamma_power
+        }
+        
+        dominant_wave = max(powers, key=powers.get)
+        
+        # 脳波タイプに応じた数値マッピング
+        wave_values = {
+            "theta": 1.0,   # 0-1: Theta優勢
+            "alpha": 2.5,   # 2-3: Alpha優勢  
+            "beta": 4.0,    # 3-4: Beta優勢
+            "gamma": 5.5    # 5+: Gamma優勢
+        }
+        
+        value = wave_values.get(dominant_wave, 2.5)
+        
+        # 強度で微調整
+        max_power = powers[dominant_wave]
+        intensity_factor = min(max_power * 1000, 2.0)  # 最大2倍まで
+        final_value = value + intensity_factor
+        
+        message = f"{final_value:.2f}"
+        udp_socket.sendto(message.encode(), (UDP_IP, UDP_PORT))
+        
+        print(f"Sent brainwave: {dominant_wave.upper()} -> {final_value:.2f}")
+        print(f"  Powers - θ:{theta_power:.4f} α:{alpha_power:.4f} β:{beta_power:.4f} γ:{gamma_power:.4f}")
+        
+    except Exception as e:
+        print(f"Failed to send brainwave data: {e}")
 
 while 1:
     
@@ -666,7 +687,13 @@ while 1:
                     avg_beta_power = beta_power_1
                     avg_gamma_power = gamma_power_1
                     
-                    send_mqtt_command(avg_theta_power, avg_alpha_power, avg_beta_power, avg_gamma_power)
+                    # EEG生データを送信（Ch1の最新値）
+                    if len(data_1ch_test) > 0:
+                        latest_raw_value = data_1ch_test[-1]  # Ch1の最新生データ
+                        send_udp_raw_data(latest_raw_value)
+                    
+                    # 脳波解析結果も送信（オプション）
+                    # send_brainwave_powers(avg_theta_power, avg_alpha_power, avg_beta_power, avg_gamma_power)
 
                     plt.pause(0.0000000000001)
                     
