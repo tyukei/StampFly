@@ -9,7 +9,6 @@ dependencies = [
     "matplotlib===3.9.2",
     "notebook>=7.4.2",
     "numpy>=1.24.0",
-    "paho-mqtt>=1.6.1",
     "pandas>=2.2.3",
     "scipy===1.14.1",
     "spicy===0.16.0",
@@ -20,6 +19,7 @@ dependencies = [
     "python-socketio>=5.8.0",
     "eventlet>=0.33.0",
     "requests>=2.31.0",
+    "paho-mqtt>=2.1.0",
 ]
 
 [tool.uv.workspace]
