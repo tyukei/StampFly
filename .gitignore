@@ -4,6 +4,14 @@
 # Build outputs
 .pio
 build/
+web/node_modules/
+web/dist/
+node_modules/
+
+# Python / tooling
+.venv/
+.playwright-mcp/
+__pycache__/
 
 # IDE files
 .vscode/.browse.c_cpp.db*
