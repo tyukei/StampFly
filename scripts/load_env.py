@@ -17,4 +17,7 @@ if env_file.exists():
                 elif key == 'WIFI_PASSWORD':
                     print(f'-DWIFI_PASSWORD=\\"{value}\\"')
 else:
-    print("# .env file not found")
+    # No .env (e.g. CI): emit nothing so no build flag is injected.
+    # The firmware falls back to its compiled-in WIFI_SSID/PASSWORD defaults.
+    # (Printing a comment here would be parsed as a bogus build flag and fail.)
+    pass
