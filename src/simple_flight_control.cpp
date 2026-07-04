@@ -31,81 +31,71 @@ unsigned long last_eeg_update = 0;
 bool eeg_active = false;
 
 void setMotorESC(int channel, float throttle) {
+    // 最小5%、最大100%
     if (throttle < 0.05f) throttle = 0.05f;
-    if (throttle > 2.0f) throttle = 2.0f;  // 最大200%まで許可（ESC限界まで）
+    if (throttle > 1.0f) throttle = 1.0f;
     
-    // 200%対応：PWM範囲を拡張
-    uint32_t pulse_min = (uint32_t)(4096 * 0.05);  // 5% = 1000us
-    uint32_t pulse_max = (uint32_t)(4096 * 0.20);  // 20% = 2000us（通常最大）
-    uint32_t pulse_ultra = (uint32_t)(4096 * 0.25); // 25% = 2500us（200%推力）
-    
-    uint32_t pulse_width;
-    if (throttle <= 1.0f) {
-        // 通常範囲 (5%-100%)
-        pulse_width = pulse_min + (uint32_t)((pulse_max - pulse_min) * throttle);
-    } else {
-        // 超過範囲 (100%-200%)
-        float over_ratio = throttle - 1.0f;  // 1.0-2.0 -> 0.0-1.0
-        pulse_width = pulse_max + (uint32_t)((pulse_ultra - pulse_max) * over_ratio);
-    }
+    uint32_t pulse_min = (uint32_t)(4096 * 0.05);
+    uint32_t pulse_max = (uint32_t)(4096 * 0.10);
+    uint32_t pulse_width = pulse_min + (uint32_t)((pulse_max - pulse_min) * throttle);
     
     ledcWrite(channel, pulse_width);
 }
 
 void setLED(uint8_t r, uint8_t g, uint8_t b) {
-    for (int i = 0; i < 3; i++) {
-        digitalWrite(LED_PINS[i], (r > 127) ? HIGH : LOW);
-    }
+    digitalWrite(LED_PINS[0], r > 127 ? HIGH : LOW);
+    digitalWrite(LED_PINS[1], g > 127 ? HIGH : LOW);
+    digitalWrite(LED_PINS[2], b > 127 ? HIGH : LOW);
 }
 
-void controlMotorsWithEEG(float eegValue) {
-    // 200%推力で確実に浮上！
+void controlMotorsForFlight(float eegValue) {
+    // 浮力重視設定（ほぼ100%推力）
     float thrust[4];  // FL, FR, RL, RR
     
     if (eegValue < 1.0f) {
-        // 強い左回転: 200%推力で浮上しながら回転
-        thrust[0] = 2.00f; // FL 200%!!!
-        thrust[1] = 1.50f; // FR 150%  
-        thrust[2] = 2.00f; // RL 200%!!!
-        thrust[3] = 1.50f; // RR 150%
-        setLED(255, 0, 255); // マゼンタ
-        Serial.println(">>> 超強力左回転: FL/RL=200%!!! FR/RR=150%");
+        // 左回転（浮力維持しながら）
+        thrust[0] = 1.00f; // FL 100%
+        thrust[1] = 0.85f; // FR 85%
+        thrust[2] = 1.00f; // RL 100%
+        thrust[3] = 0.85f; // RR 85%
+        setLED(0, 0, 255); // 青
+        Serial.println(">>> 左回転飛行: FL/RL=100%, FR/RR=85%");
     }
     else if (eegValue < 2.0f) {
-        // 左回転: 高推力で確実浮上
-        thrust[0] = 1.80f; // FL 180%
-        thrust[1] = 1.60f; // FR 160%
-        thrust[2] = 1.80f; // RL 180%
-        thrust[3] = 1.60f; // RR 160%
-        setLED(0, 0, 255); // 青
-        Serial.println(">>> 強力左回転: FL/RL=180%, FR/RR=160%");
+        // 緩やかな左回転
+        thrust[0] = 0.95f; // FL 95%
+        thrust[1] = 0.90f; // FR 90%
+        thrust[2] = 0.95f; // RL 95%
+        thrust[3] = 0.90f; // RR 90%
+        setLED(0, 255, 255); // シアン
+        Serial.println(">>> 緩やかな左回転: FL/RL=95%, FR/RR=90%");
     }
     else if (eegValue < 3.0f) {
-        // 直進: 最大200%推力で確実浮上!!!
-        thrust[0] = 2.00f; // FL 200%!!!
-        thrust[1] = 2.00f; // FR 200%!!!
-        thrust[2] = 2.00f; // RL 200%!!!
-        thrust[3] = 2.00f; // RR 200%!!!
+        // 上昇飛行（最大推力）
+        thrust[0] = 1.00f; // FL 100%
+        thrust[1] = 1.00f; // FR 100%
+        thrust[2] = 1.00f; // RL 100%
+        thrust[3] = 1.00f; // RR 100%
         setLED(0, 255, 0); // 緑
-        Serial.println(">>> 🚀🚀🚀 超強力上昇: 全モーター200%!!! 🚀🚀🚀");
+        Serial.println(">>> 最大上昇: 全モーター100%");
     }
     else if (eegValue < 4.0f) {
-        // 右回転: 高推力で確実浮上
-        thrust[0] = 1.60f; // FL 160%
-        thrust[1] = 1.80f; // FR 180%
-        thrust[2] = 1.60f; // RL 160%
-        thrust[3] = 1.80f; // RR 180%
+        // 緩やかな右回転
+        thrust[0] = 0.90f; // FL 90%
+        thrust[1] = 0.95f; // FR 95%
+        thrust[2] = 0.90f; // RL 90%
+        thrust[3] = 0.95f; // RR 95%
         setLED(255, 255, 0); // 黄
-        Serial.println(">>> 強力右回転: FL/RL=160%, FR/RR=180%");
+        Serial.println(">>> 緩やかな右回転: FL/RL=90%, FR/RR=95%");
     }
     else {
-        // 強い右回転: 200%推力で浮上しながら回転
-        thrust[0] = 1.50f; // FL 150%
-        thrust[1] = 2.00f; // FR 200%!!!
-        thrust[2] = 1.50f; // RL 150%
-        thrust[3] = 2.00f; // RR 200%!!!
+        // 右回転（浮力維持しながら）
+        thrust[0] = 0.85f; // FL 85%
+        thrust[1] = 1.00f; // FR 100%
+        thrust[2] = 0.85f; // RL 85%
+        thrust[3] = 1.00f; // RR 100%
         setLED(255, 0, 0); // 赤
-        Serial.println(">>> 超強力右回転: FL/RL=150%, FR/RR=200%!!!");
+        Serial.println(">>> 右回転飛行: FL/RL=85%, FR/RR=100%");
     }
     
     // モーター制御実行
@@ -115,7 +105,7 @@ void controlMotorsWithEEG(float eegValue) {
     
     Serial.printf("EEG: %.2f | 推力 - FL:%.0f%% FR:%.0f%% RL:%.0f%% RR:%.0f%%\n", 
                  eegValue, thrust[0]*100, thrust[1]*100, thrust[2]*100, thrust[3]*100);
-    Serial.println("各モーターの音や振動の違いを確認してください");
+    Serial.println("🚁 飛行モード: 浮力重視設定");
     Serial.println("--------------------------------------------------");
 }
 
@@ -124,8 +114,8 @@ void setup() {
     delay(2000);
     
     Serial.println("=========================================");
-    Serial.println("EXTREME MOTOR DIFFERENCE TEST");
-    Serial.println("極端な推力差テスト（最大20倍差・100%推力）");
+    Serial.println("🚁 SIMPLE FLIGHT CONTROL");
+    Serial.println("浮力重視・簡単飛行制御システム");
     Serial.println("=========================================");
     
     // LED初期化
@@ -161,25 +151,24 @@ void setup() {
         }
     }
     
-    Serial.println("\n=== 極端推力差テスト準備完了 ===");
-    Serial.println("EEG値 0-1: FL/RL=100%, FR/RR=5% (20倍差!)");
-    Serial.println("EEG値 1-2: FL/RL=80%, FR/RR=20% (4倍差)");  
-    Serial.println("EEG値 2-3: 全モーター70% (直進浮上)");
-    Serial.println("EEG値 3-4: FL/RL=20%, FR/RR=80% (4倍差)");
-    Serial.println("EEG値 4+:  FL/RL=5%, FR/RR=100% (20倍差!)");
-    Serial.println("=====================================");
+    Serial.println("\n=== 🚁 飛行制御システム準備完了 ===");
+    Serial.println("EEG値 0-1: 左回転飛行（FL/RL=100%, FR/RR=85%）");
+    Serial.println("EEG値 1-2: 緩やか左回転（FL/RL=95%, FR/RR=90%）");  
+    Serial.println("EEG値 2-3: 最大上昇（全モーター100%）");
+    Serial.println("EEG値 3-4: 緩やか右回転（FL/RL=90%, FR/RR=95%）");
+    Serial.println("EEG値 4+:  右回転飛行（FL/RL=85%, FR/RR=100%）");
+    Serial.println("====================================");
     
     // 警告表示
-    Serial.println("\n*** ⚠️  警告: 最大推力200%使用 ⚠️  ***");
-    Serial.println("確実に浮上するため超強力推力を使用！");
-    Serial.println("ESC限界まで使用 - 安全な場所で飛行してください！");
+    Serial.println("\n*** ⚠️  飛行準備: 最大100%推力使用 ***");
+    Serial.println("ドローンを安全な場所で飛行させてください！");
     
     // 起動表示
-    for (int i = 0; i < 5; i++) {
-        setLED(255, 0, 0);
-        delay(200);
+    for (int i = 0; i < 3; i++) {
+        setLED(255, 255, 255);
+        delay(300);
         setLED(0, 0, 0);  
-        delay(200);
+        delay(300);
     }
 }
 
@@ -190,7 +179,7 @@ void loop() {
     // 3秒毎に状態表示
     if (millis() - lastPrint > 3000) {
         Serial.printf("\nStatus - Packets: %lu, EEG: %.2f, Active: %s\n", 
-                     packetCount, current_eeg_value, eeg_active ? "YES" : "NO");
+                     packetCount, current_eeg_value, eeg_active ? "FLYING" : "STANDBY");
         
         if (!eeg_active) {
             Serial.println("EEGデータ待機中 - 全モーター最小推力");
@@ -220,13 +209,13 @@ void loop() {
             last_eeg_update = millis();
             eeg_active = true;
             
-            controlMotorsWithEEG(current_eeg_value);
+            controlMotorsForFlight(current_eeg_value);
         }
     }
     
-    // EEGタイムアウト（5秒）
-    if (eeg_active && (millis() - last_eeg_update > 5000)) {
-        Serial.println("\nEEGタイムアウト - 全モーター最小推力に戻る");
+    // EEGタイムアウト（3秒）
+    if (eeg_active && (millis() - last_eeg_update > 3000)) {
+        Serial.println("\nEEGタイムアウト - 安全着陸モード");
         eeg_active = false;
         for (int i = 0; i < 4; i++) {
             setMotorESC(i, 0.05f);
