@@ -35,3 +35,6 @@ jobs:
       # fall back to the defaults baked into eeg_mqtt_drone.cpp (build only).
       - name: Build eeg_mqtt firmware
         run: pio run -e eeg_mqtt
+      # Wi-Fi(soft-AP) + WebSocket リモコンファーム (スマホから操作).
+      - name: Build wifi_rc firmware
+        run: pio run -e wifi_rc
